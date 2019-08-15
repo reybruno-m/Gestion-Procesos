@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<!-- layouts.navbar -->
+@include('layouts.navbar')
 
 
 <section>
