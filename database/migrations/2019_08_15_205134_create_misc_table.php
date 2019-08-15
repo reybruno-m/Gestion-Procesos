@@ -16,7 +16,7 @@ class CreateMiscTable extends Migration
         Schema::create('misc', function (Blueprint $table) {
             $table->bigIncrements('id');           # Indice Incrementable.
             $table->integer('group');              # Agrupa los valores por categorias.
-            $table->string('name');              # Establece un nombre para la opcion.
+            $table->string('name');                # Establece un nombre para la opcion.
             $table->integer('value');              # Asigna un valor a la opcion especifica.
             # $table->timestamps();                # Creado / Modificado.
         });

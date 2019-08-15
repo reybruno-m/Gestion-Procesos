@@ -11,14 +11,17 @@ class CreateRequestsTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up() 
     {
         Schema::create('requests', function (Blueprint $table) {
             $table->bigIncrements('id');                                        # Indice Incrementable.
             $table->string('description')->nullable()->default(null);           # Descripcion de la Peticion. 
-            $table->integer('id_priority');                                    # Nivel de Prioridad 'table_various'
-            $table->integer('id_user');                                      # Indice de Usuario 'table_users'
-            $table->integer('id_origin');                                       # Indice del origen 'table_origins'
+            $table->bigInteger('id_priority')->nullable()->unsigned();          # Nivel de Prioridad 'table_various'
+            $table->foreign('id_priority')->references('id')->on('misc');       
+            $table->bigInteger('id_user')->nullable()->unsigned();              # Indice de Usuario 'table_users'
+            $table->foreign('id_user')->references('id')->on('users');
+            $table->bigInteger('id_origin')->nullable()->unsigned();            # Indice del origen 'table_origins'
+            $table->foreign('id_origin')->references('id')->on('origins');      
             $table->timestamps();                                               # Creado / Modificado.
         });
     }

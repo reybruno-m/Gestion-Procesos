@@ -15,8 +15,9 @@ class CreateOriginsTable extends Migration
     {
         Schema::create('origins', function (Blueprint $table) {
             $table->bigIncrements('id');                                        # Indice Incrementable.
-            $table->integer('id_type');                                         # Tipo de Entidad 'table_various'.
-            $table->string('name');                                           # Nombre Descriptivo.
+            $table->bigInteger('id_type')->nullable()->unsigned();              # Tipo de Entidad 'table_various'.
+            $table->foreign('id_type')->references('id')->on('misc');
+            $table->string('name');                                             # Nombre Descriptivo.
             $table->timestamps();                                               # Creado / Modificado.
         });
     }
