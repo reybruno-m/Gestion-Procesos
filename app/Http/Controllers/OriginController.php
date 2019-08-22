@@ -4,6 +4,8 @@ namespace it\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use it\Origin;
+
 class OriginController extends Controller
 {
     /**
@@ -18,7 +20,12 @@ class OriginController extends Controller
 
     public function index()
     {
-        return view("origins.index");
+
+        $origins = Origin::find(1);
+        echo $origins->miscs::all();
+        /*//return view("origins.index");
+        $origins->miscs();
+        dd($origins);*/
     }
 
     /**

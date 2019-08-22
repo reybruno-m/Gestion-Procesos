@@ -18,10 +18,10 @@ class CreateRequestsTable extends Migration
             $table->string('description')->nullable()->default(null);           # Descripcion de la Peticion. 
             $table->bigInteger('misc_id')->nullable()->unsigned();          # Nivel de Prioridad 'table_various'
             $table->foreign('misc_id')->references('id')->on('misc');       
-            $table->bigInteger('id_user')->nullable()->unsigned();              # Indice de Usuario 'table_users'
-            $table->foreign('id_user')->references('id')->on('users');
-            $table->bigInteger('id_origin')->nullable()->unsigned();            # Indice del origen 'table_origins'
-            $table->foreign('id_origin')->references('id')->on('origins');      
+            $table->bigInteger('user_id')->nullable()->unsigned();              # Indice de Usuario 'table_users'
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->bigInteger('origin_id')->nullable()->unsigned();            # Indice del origen 'table_origins'
+            $table->foreign('origin_id')->references('id')->on('origins');      
             $table->timestamps();                                               # Creado / Modificado.
         });
     }

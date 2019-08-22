@@ -16,14 +16,14 @@ class CreateMovementsTable extends Migration
         Schema::create('movements', function (Blueprint $table) {
             $table->bigIncrements('id');                                               # Indice Incrementable.
             
-            $table->bigInteger('id_request')->nullable()->unsigned();                  # Indice Solicitud 'table_requests'.
-            $table->foreign('id_request')->references('id')->on('requests');
+            $table->bigInteger('request_id')->nullable()->unsigned();                  # Indice Solicitud 'table_requests'.
+            $table->foreign('request_id')->references('id')->on('requests');
 
-            $table->bigInteger('id_user')->nullable()->unsigned();                     # Indice Usuario 'table_users'.
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->bigInteger('user_id')->nullable()->unsigned();                     # Indice Usuario 'table_users'.
+            $table->foreign('user_id')->references('id')->on('users');
             
-            $table->bigInteger('misc_id')->nullable()->unsigned();                    # Indice Estado 'table_various'.
-            $table->foreign('misc_id')->references('id')->on('states');
+            $table->bigInteger('state_id')->nullable()->unsigned();                    # Indice Estado 'table_states'.
+            $table->foreign('state_id')->references('id')->on('states');
             
             $table->longtext('description')->nullable()->default(null);                # Descripcion de lo realizado.
             $table->timestamp('taken')->useCurrent();                                  # Fecha de Tomado/Creacion.

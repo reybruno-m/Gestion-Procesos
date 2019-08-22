@@ -35,7 +35,12 @@ Route::resource('/management', 'ManagementController', [
 	ABM Origenes, Sectores/Personas
 */
 
-Route::resource('/origins', 'OriginController', [
+
+Route::get('/origins', function () {
+    return view('origins.index');
+});
+
+Route::resource('/getOrigins', 'OriginController', [
     'only' => ['index', 'create', 'store']
 ]);
 
