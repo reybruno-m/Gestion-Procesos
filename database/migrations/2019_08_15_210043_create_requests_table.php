@@ -16,8 +16,8 @@ class CreateRequestsTable extends Migration
         Schema::create('requests', function (Blueprint $table) {
             $table->bigIncrements('id');                                        # Indice Incrementable.
             $table->string('description')->nullable()->default(null);           # Descripcion de la Peticion. 
-            $table->bigInteger('id_priority')->nullable()->unsigned();          # Nivel de Prioridad 'table_various'
-            $table->foreign('id_priority')->references('id')->on('misc');       
+            $table->bigInteger('misc_id')->nullable()->unsigned();          # Nivel de Prioridad 'table_various'
+            $table->foreign('misc_id')->references('id')->on('misc');       
             $table->bigInteger('id_user')->nullable()->unsigned();              # Indice de Usuario 'table_users'
             $table->foreign('id_user')->references('id')->on('users');
             $table->bigInteger('id_origin')->nullable()->unsigned();            # Indice del origen 'table_origins'

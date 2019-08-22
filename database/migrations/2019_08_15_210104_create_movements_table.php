@@ -22,8 +22,8 @@ class CreateMovementsTable extends Migration
             $table->bigInteger('id_user')->nullable()->unsigned();                     # Indice Usuario 'table_users'.
             $table->foreign('id_user')->references('id')->on('users');
             
-            $table->bigInteger('id_state')->nullable()->unsigned();                    # Indice Estado 'table_various'.
-            $table->foreign('id_state')->references('id')->on('states');
+            $table->bigInteger('misc_id')->nullable()->unsigned();                    # Indice Estado 'table_various'.
+            $table->foreign('misc_id')->references('id')->on('states');
             
             $table->longtext('description')->nullable()->default(null);                # Descripcion de lo realizado.
             $table->timestamp('taken')->useCurrent();                                  # Fecha de Tomado/Creacion.
