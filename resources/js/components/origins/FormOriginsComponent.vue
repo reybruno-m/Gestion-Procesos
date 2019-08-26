@@ -25,8 +25,8 @@
                 <div class="col">
                     <label for="estado"><b>Estado: </b></label>
                     <select class="form-control" id="estado_origen" name="estado_origen" v-model="registry.estado_origen" tabindex="3">
-                        <option value="activo">Activo (Visible)</option>
-                        <option value="inactivo">Inactivo (Oculto)</option>
+                        <option value="active">Activo (Visible)</option>
+                        <option value="inactive">Inactivo (Oculto)</option>
                     </select>
                 </div>
             </div>
@@ -58,10 +58,10 @@
 
         mounted() {
             this.registry.tipo_origen = 0;
-            this.registry.estado_origen = 'activo';
+            this.registry.estado_origen = 'active';
 
             document.getElementById("nombre_origen").focus();
-            this.cargarTiposOrigenes();
+            this.loadOriginTypes();
         },
 
         methods: {
@@ -86,7 +86,7 @@
 
             /* Obtiene de la tabla Misc el grupo indicado y lo carga en un select */
 
-            cargarTiposOrigenes: function(){
+            loadOriginTypes: function(){
                 axios
                 .get('getMisc?group=1')
                 .then(listado => {
@@ -105,6 +105,7 @@
               let datos = new FormData();
               datos.append("nombre_origen", this.registry.nombre_origen);
               datos.append("tipo_origen", this.registry.tipo_origen);
+              datos.append("estado_origen", this.registry.estado_origen);
               return datos;
             },
 

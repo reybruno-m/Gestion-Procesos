@@ -56,9 +56,7 @@ Auth::routes();
 /*
     Listado de Origenes.
 */
-Route::resource('/origin', 'OriginController', [
-    'only' => ['index', 'create', 'store']
-]);
+Route::resource('/origin', 'OriginController');
 
 /*
     Tipos de Origenes

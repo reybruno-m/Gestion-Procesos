@@ -8,7 +8,7 @@ class Origin extends Model
 {
     protected $table = "origins";
 
-    protected $fillable = ['misc_id', 'name'];
+    protected $fillable = ['misc_id', 'name', 'state'];
 
     // Relation To Request
     /*

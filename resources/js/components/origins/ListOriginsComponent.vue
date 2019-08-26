@@ -37,7 +37,8 @@
                             <th class="text-left">Nombre</th>
                             <th class="text-center" width="200px">Tipo</th>
                             <th class="text-center" width="170px">Creado</th>
-                            <th class="text-center" width="150px">Acciones</th>
+                            <th class="text-center" width="170px">Estado</th>
+                            <th class="text-center" width="300px">Acciones</th>
                         </tr>
                     </thead>
 
@@ -45,17 +46,40 @@
                         <tr v-for="(element, index) in arrayFilter" :key="element.id">
                             <td class="text-left">{{element.name}}</td>
                             <td class="text-center">{{element.misc_name}}</td>
-                            <td class="text-center">{{element.created_at}}</td>
+                            <td class="text-center">{{ element.created_at | formatDate }}</td>
+                            
+                            <td class="text-center" v-if="element.state === 'active'">Activo</td>
+                            <td class="text-center" v-else>Inactivo</td>
+
                             <td class="text-center">
-                                <input type="button" class="btn btn-sm btn-outline-primary" @click="" value="Editar">
-                                <input type="button" class="btn btn-sm btn-outline-danger" @click="" value="Borrar">
+                                <input 
+                                    type="button" 
+                                    class="btn btn-sm btn-width"
+                                    @click="changeStateOrigin(element, index)"
+                                    value="Desactivar"
+                                    v-bind:class="(element.state === 'active') ?  'btn-dark' : 'btn-success' "
+                                >
+
+                                <input 
+                                    type="button" 
+                                    class="btn btn-sm btn-primary btn-width" 
+                                    @click="" 
+                                    value="Editar"
+                                >
+                                <input 
+                                    type="button" 
+                                    class="btn btn-sm btn-danger btn-width"
+                                    @click="deleteOrigin(element, index)"
+                                    value="Borrar"
+                                >
+
                             </td>
                         </tr>
                     </tbody>
 
                     <tfoot v-else>
                         <tr>
-                            <th colspan="4" class="text-center">
+                            <th colspan="5" class="text-center">
                                 Sin resultados para mostrar
                                 <a href="#" @click="clearView(1)">Cargar Uno</a>
                             </th>
@@ -76,8 +100,8 @@
             return {
                 success: false,         // true <- muestra listado | false <- muestra mjs sin resultados.
                 operation: 0,           // 0 listado, 1 alta, 2 edita.
-                dataReg: [],            // Datos del cliente nuevo. 'registry'
-                listElements: [],       // Listado de clientes.
+                dataReg: [],            // Datos del origen nuevo. 'registry'
+                listElements: [],       // Listado de origenes.
                 term: '',               // Termino de Busqueda.
             }
         },
@@ -85,7 +109,7 @@
         mounted() {
             console.log('Listado de Origenes Cargado.')
             this.cargarListado();
-        
+
         }, // Mounted.
 
         computed: {
@@ -119,6 +143,40 @@
                 })
             },
 
+            /* Cambiar el estado del Origen, para que pueda ser utilizado o no. */
+            changeStateOrigin:  function(data, index){
+                
+                let params = new FormData();
+                params.append("id", data.id);
+                params.append("_method", "PATCH");
+                params.append("action", "cambiar_estado");
+
+                axios
+                .post('origin/' + data.id, params)
+                .then(response => {
+                    if (response.data.success) {
+                        this.listElements[index].state = response.data.element.state;
+                    }
+                })
+                .catch(error => console.log(error))
+            },
+
+
+            deleteOrigin: function(data, index){
+              if (confirm("Desea eliminar este Origen?")) {
+                axios
+                .delete('origin/' + data.id)
+                .then( response => {
+                  if (response.data.success) {
+                    this.listElements.splice(index, 1);
+                    if (this.listElements.length == 0) {
+                      this.success = false;
+                    }
+                  }
+                })
+              }
+            },
+
             /* Carga en la vista un nuevo elemento y lo muestra. */
 
             pushData(data){
@@ -139,3 +197,9 @@
 
     }
 </script>
+
+<style type="text/css">
+    .btn-width{
+        width: 80px;
+    }
+</style>

@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="fixedContainer" id="app">
+<div class="fixedContainer" id="origins">
 	
 	<list-origins-component></list-origins-component>
 

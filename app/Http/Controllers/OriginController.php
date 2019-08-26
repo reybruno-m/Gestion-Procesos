@@ -10,15 +10,21 @@ use DB;
 
 class OriginController extends Controller
 {
+
+    public $response = array();
+
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-     public function __construct()
-     {
-       $this->middleware('auth');
-     }
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->response['msj'] = "";
+        $this->response['success'] = false;
+    }
 
     public function index()
     {
@@ -51,14 +57,11 @@ class OriginController extends Controller
      */
     public function store(Request $request)
     {
-        $response = array();
-        $response['msj'] = "";
-        $response['success'] = false;
-
         try {
             
             $nombre_origen = ucwords(addslashes($request->input('nombre_origen')));
             $tipo_origen = ucwords(addslashes($request->input('tipo_origen')));
+            $estado_origen = addslashes($request->input('estado_origen'));
 
             if ($nombre_origen == '')
                 throw new \Exception("El nombre de origen no puede estar vacio.");
@@ -70,17 +73,18 @@ class OriginController extends Controller
 
             $origin->name = $nombre_origen;
             $origin->misc_id = $tipo_origen;
+            $origin->state = $estado_origen;
             $origin->save();
 
-            $response['elements'] = $origin;
-            $response['success'] = true;
-            $response['msj'] = "Registro guardado con exito.";
+            $this->response['elements'] = $origin;
+            $this->response['success'] = true;
+            $this->response['msj'] = "Registro guardado con exito.";
             
         } catch (Exception $e) {
             $response['msj'] = $e->getMessage();
         }
 
-        return $response;
+        return $this->response;
     }
 
     /**
@@ -114,7 +118,46 @@ class OriginController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        try {
+
+            $id = addslashes($request->input('id'));
+            $action = addslashes($request->input('action'));
+
+            if (!is_numeric($id))
+                throw new \Exception("Error, Indice no definido.");
+
+            switch ($action) {
+                case 'cambiar_estado':
+                    
+                    $origin = array();
+                    $origin = Origin::findOrFail($id);
+
+
+                    if ($origin->state == 'active') {
+                        $origin->state = 'inactive';
+                        $response['msj'] = "Registro Desactivado con exito.";
+                    }else{
+                        $origin->state = 'active';
+                        $response['msj'] = "Registro Activado con exito.";
+                    }
+                    
+                    $origin->save();
+                    $this->response['element'] = $origin;
+                    $this->response['success'] = true;
+
+                    break;
+                
+                default:
+                    //throw new \Exception("Error, Accion no definida.");
+                    break;
+            }
+            
+        } catch (Exception $e) {
+            $response['msj'] = $e->getMessage();
+        }
+
+        return $this->response;       
     }
 
     /**
@@ -125,6 +168,20 @@ class OriginController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+
+            if (!is_numeric($id)) throw new \Exception("El parametro indicado no es correcto.");
+
+            $origin = Origin::find($id);
+            $origin->delete();
+        
+            $this->response['success'] = true;
+            $this->response['msj'] = "Origen eliminado con exito.";
+
+        } catch (\Exception $e) {
+            $msj = $e->getMessage();
+        }
+
+        return $this->response;
     }
 }
