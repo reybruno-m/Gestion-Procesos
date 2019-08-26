@@ -4,7 +4,9 @@ namespace it\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use it\Misc;
 use it\Origin;
+use DB;
 
 class OriginController extends Controller
 {
@@ -20,12 +22,15 @@ class OriginController extends Controller
 
     public function index()
     {
+        $origins = DB::table('origins AS o')
+            ->join('misc AS m', 'o.misc_id', '=', 'm.id')
+            ->select('o.*', 'm.name AS misc_name', 'm.group AS misc_group')
+            ->orderBy('o.name', 'asc')
+            ->get();
 
-        $origins = Origin::find(1);
-        echo $origins->miscs::all();
-        /*//return view("origins.index");
-        $origins->miscs();
-        dd($origins);*/
+        //$origins = Origin::all();
+            
+        return $origins;        
     }
 
     /**
@@ -46,7 +51,36 @@ class OriginController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $response = array();
+        $response['msj'] = "";
+        $response['success'] = false;
+
+        try {
+            
+            $nombre_origen = ucwords(addslashes($request->input('nombre_origen')));
+            $tipo_origen = ucwords(addslashes($request->input('tipo_origen')));
+
+            if ($nombre_origen == '')
+                throw new \Exception("El nombre de origen no puede estar vacio.");
+
+            if (!is_numeric($tipo_origen))
+                throw new \Exception("El tipo de origen no puede estar vacio.");
+
+            $origin = new Origin();
+
+            $origin->name = $nombre_origen;
+            $origin->misc_id = $tipo_origen;
+            $origin->save();
+
+            $response['elements'] = $origin;
+            $response['success'] = true;
+            $response['msj'] = "Registro guardado con exito.";
+            
+        } catch (Exception $e) {
+            $response['msj'] = $e->getMessage();
+        }
+
+        return $response;
     }
 
     /**

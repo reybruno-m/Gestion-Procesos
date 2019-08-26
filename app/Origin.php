@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Origin extends Model
 {
+    protected $table = "origins";
+
+    protected $fillable = ['misc_id', 'name'];
+
     // Relation To Request
     /*
     public function requests()
