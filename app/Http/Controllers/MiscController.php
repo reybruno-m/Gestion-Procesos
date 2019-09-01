@@ -22,4 +22,19 @@ class MiscController extends Controller
 	    	}
     	}
     }
+
+    /*
+		Retorna un objeto con un unico elemento, basandose en el ID.
+    */
+
+    public function getMiscByID(Request $request){
+    	if (is_numeric(addslashes($request->input('id')))) {
+
+	    	$tiposOrigen = DB::table('misc')->where('id', $request->input('id'))->get();
+	    	//if (count($tiposOrigen) > 0) {
+		    	return $tiposOrigen;
+	    	//}
+    	}
+    }
+
 }

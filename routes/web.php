@@ -27,7 +27,7 @@ Route::resource('/management', 'ManagementController', [
 
 Route::get('/origins', function () {
     return view('origins.index');
-});
+})->middleware('auth');
 
 /*
 	Generar Reportes.
@@ -56,11 +56,14 @@ Auth::routes();
 /*
     Listado de Origenes.
 */
-Route::resource('/origin', 'OriginController');
+Route::resource('/origin', 'OriginController', [
+    'except' => ['create']
+]);
 
 /*
     Tipos de Origenes
 */
 
 Route::get('/getMisc', 'MiscController@getMiscGroup');
+Route::get('/getMiscByID', 'MiscController@getMiscByID');
 

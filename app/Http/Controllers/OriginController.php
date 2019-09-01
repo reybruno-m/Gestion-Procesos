@@ -34,19 +34,7 @@ class OriginController extends Controller
             ->orderBy('o.name', 'asc')
             ->get();
 
-        //$origins = Origin::all();
-            
         return $origins;        
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -59,29 +47,33 @@ class OriginController extends Controller
     {
         try {
             
-            $nombre_origen = ucwords(addslashes($request->input('nombre_origen')));
-            $tipo_origen = ucwords(addslashes($request->input('tipo_origen')));
-            $estado_origen = addslashes($request->input('estado_origen'));
+            $name = ucwords(addslashes($request->input('name')));
+            $misc_id = ucwords(addslashes($request->input('misc_id'))); # ID
+            $state = addslashes($request->input('state'));
 
-            if ($nombre_origen == '')
+            if ($name == '')
                 throw new \Exception("El nombre de origen no puede estar vacio.");
 
-            if (!is_numeric($tipo_origen))
+            if (!is_numeric($misc_id))
                 throw new \Exception("El tipo de origen no puede estar vacio.");
+
+            $misc_tipo = Misc::find($misc_id);
 
             $origin = new Origin();
 
-            $origin->name = $nombre_origen;
-            $origin->misc_id = $tipo_origen;
-            $origin->state = $estado_origen;
+            $origin->name = $name;
+            $origin->misc_id = $misc_id;
+            $origin->state = $state;
             $origin->save();
+
+            $origin->misc_name = $misc_tipo->name;
 
             $this->response['elements'] = $origin;
             $this->response['success'] = true;
             $this->response['msj'] = "Registro guardado con exito.";
             
         } catch (Exception $e) {
-            $response['msj'] = $e->getMessage();
+            $this->response['msj'] = $e->getMessage();
         }
 
         return $this->response;
@@ -127,24 +119,36 @@ class OriginController extends Controller
             if (!is_numeric($id))
                 throw new \Exception("Error, Indice no definido.");
 
-            switch ($action) {
+            $origin = array();
+            $origin = Origin::findOrFail($id);
+
+            switch ($action) 
+            {
                 case 'cambiar_estado':
-                    
-                    $origin = array();
-                    $origin = Origin::findOrFail($id);
-
-
+                
                     if ($origin->state == 'active') {
                         $origin->state = 'inactive';
-                        $response['msj'] = "Registro Desactivado con exito.";
+                        $this->response['msj'] = "Registro Desactivado con exito.";
                     }else{
                         $origin->state = 'active';
-                        $response['msj'] = "Registro Activado con exito.";
+                        $this->response['msj'] = "Registro Activado con exito.";
                     }
+
+                    break;
+
+                case 'actualizar_datos':
+
+                    $name = addslashes(ucwords($request->input('name')));
+                    $misc_id = addslashes($request->input('misc_id'));
+                    $state = addslashes(strtolower($request->input('state')));
+
+                    if ($name == "") throw new \Exception("El nombre del origen no puede estar vacio");
+                    if (!is_numeric($misc_id)) throw new \Exception("El tipo de origen no puede estar vacio");
+                    if ($state == "") throw new \Exception("El estado de origen no puede estar vacio");
                     
-                    $origin->save();
-                    $this->response['element'] = $origin;
-                    $this->response['success'] = true;
+                    $origin->name = $request->input('name');
+                    $origin->misc_id = $request->input('misc_id');
+                    $origin->state = $request->input('state');
 
                     break;
                 
@@ -152,9 +156,13 @@ class OriginController extends Controller
                     //throw new \Exception("Error, Accion no definida.");
                     break;
             }
+
+            $origin->save();
+            $this->response['element'] = $origin;
+            $this->response['success'] = true;
             
         } catch (Exception $e) {
-            $response['msj'] = $e->getMessage();
+            $this->response['msj'] = $e->getMessage();
         }
 
         return $this->response;       

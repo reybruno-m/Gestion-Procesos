@@ -1,129 +1,265 @@
 <template>
-    <div class="container-fluid">
-        <br>
-        <div class="row">
-            <div class="col">
-                <h4 class="text-left">Nuevo Origen</h4>
-            </div>
-        </div>       
+    <div class="div-padre">
         
+        <br>
+        
+        <div class="row">
+            <div class="col alert alert-info">
+                <h4 class="text-left" v-if="operation === 1">Nuevo Origen</h4>
+                <h4 class="text-left" v-else>Editar Origen</h4>
+            </div>
+        </div>      
+
+        <br>
+
+        <div class="container-fluid" v-if="errors.length">
+            <div class="alert alert-danger" role="alert" v-for="error in errors">
+                Por favor verifique: <b>{{ error }}</b>
+            </div>
+        </div>
+
         <br>
         
         <form class="form-group" method="POST" id="frm-new-origin">
+            
             <div class="row">
+                
                 <div class="col">
-                    <label for="nombre_origen"><b>Nombre: </b></label>
-                    <input type="text" autofocus="" class="form-control" id="nombre_origen" name="nombre_origen" v-model="registry.nombre_origen" tabindex="1">
+                    <label for="name"><b>Nombre: </b></label>
+                    <input 
+                        autofocus="" 
+                        class="form-control" 
+                        id="name" 
+                        name="name" 
+                        tabindex="1"
+                        type="text" 
+                        v-model="registry.name" 
+                        placeholder="Ej. Contabilidad" 
+                    >
                 </div>
+
                 <div class="col">
-                    <label for="tipo_origen"><b>Tipo: </b></label>
-                    <select class="form-control" id="tipo_origen" name="tipo_origen" v-model="registry.tipo_origen" tabindex="2">
-                        <option disabled="" value="0">Seleccionar</option>
-                        <option v-for="tipo in tiposOrigenes" :value="tipo.id">{{tipo.name}}</option>
+                    <label for="misc_id"><b>Tipo: </b></label>
+                    <select 
+                        class="form-control" 
+                        id="misc_id" 
+                        name="misc_id" 
+                        tabindex="2"
+                        v-model="registry.misc_id" 
+                    >
+                        <option v-for="tipo in typesOrigins" :value="tipo.id">{{tipo.name}}</option>
                     </select>
                 </div>
+
                 <div class="col">
                     <label for="estado"><b>Estado: </b></label>
-                    <select class="form-control" id="estado_origen" name="estado_origen" v-model="registry.estado_origen" tabindex="3">
+                    <select 
+                        class="form-control" 
+                        id="state" 
+                        name="state" 
+                        tabindex="3"
+                        v-model="registry.state" 
+                    >
                         <option value="active">Activo (Visible)</option>
                         <option value="inactive">Inactivo (Oculto)</option>
                     </select>
                 </div>
+
             </div>
+
             <br>
+
             <div class="row">
+
                 <div class="col text-center">
-                    <input type="button" class="btn btn-outline-danger" tabindex="5" value="CANCELAR" @click="clearView()" >
+                    <input 
+                        @click="clearView()" 
+                        class="btn btn-outline-danger" 
+                        tabindex="5" 
+                        type="button" 
+                        value="CANCELAR" 
+                    >
                 </div>
-                <div class="col text-center">
-                    <input type="button" class="btn btn-outline-success" tabindex="4" value="CARGAR" @click="saveRegistry()">
+
+                <div class="col text-center" v-if="operation === 1">
+                    <input 
+                        @click="saveRegistry()"
+                        class="btn btn-outline-success" 
+                        tabindex="4" 
+                        type="button" 
+                        value="CARGAR" 
+                    >
                 </div>
+
+                <div class="col text-center" v-if="operation === 2">
+                    <input 
+                        @click="updateRegistry()"
+                        class="btn btn-outline-success" 
+                        tabindex="4" 
+                        type="button" 
+                        value="GUARDAR" 
+                    >
+                </div>
+
             </div>
+
         </form>
-        <br><hr>
+
+        <br><br>
+
     </div>
+
 </template>
 
 <script>
-    export default {
+    export default 
+    {
         props: [
-            'registry', // Contiene los elementos de un nuevo registro.
+            'operation',    // Configura la vista en base a si se esta editando, creando o listando los elementos.
+            'registry',     // Contiene los elementos de un nuevo registro.
+            'listElements',
         ],
 
-        data(){
+        data()
+        {
             return {
-                tiposOrigenes: [],       // Listado de tipos de origenes "db.misc".
+                typesOrigins: [],   // Listado de tipos de origenes "db.misc".
+                errors: [],         // Registra errores, para la validacion.
             }
         },
 
-        mounted() {
-            this.registry.tipo_origen = 0;
-            this.registry.estado_origen = 'active';
-
-            document.getElementById("nombre_origen").focus();
-            this.loadOriginTypes();
+        mounted(){
+            this.registry.state = 'active';
+            document.getElementById("name").focus();
+            this.loadTypesOrigin();
         },
 
-        methods: {
-            /* guarda un registro en la db y lo carga en la vista. */
-
-            saveRegistry: function(){
-              if (confirm("Guardar el nuevo origen?")) {
-
+        methods: 
+        {
+            // Guarda un registro en la db y lo carga en la vista.
+            saveRegistry ( ) {
                 var datos = this.getDataForm();
-                var route = 'origin';
+                if (!this.validateForm(datos).length) {
+                    var route = 'origin';
+                    axios
+                    .post(route, datos)
+                    .then(response => {
+                        alert(response.data.msj);
+                        this.$emit('pushData', response.data.elements);
+                        this.clearForm();
 
-                axios
-                  .post(route, datos)
-                  .then(response => {
-                    alert(response.data.msj);
-                      this.$emit('pushData', response.data.elements);
-                      this.clearForm();
-                  })
-                  .catch(error => console.log(error))
+                    })
+                    .catch(error => console.log(error))
                 }
             },
 
-            /* Obtiene de la tabla Misc el grupo indicado y lo carga en un select */
+            // Actualiza un registro en la db y en la vista.
+            updateRegistry ( ) {
+                const datos = this.getDataForm();
+                var response = this.inArray(this.registry.misc_id, this.typesOrigins);
+                this.registry.misc_name = response.name;
 
-            loadOriginTypes: function(){
+                if (!this.validateForm(datos).length) {
+                    datos.append("_method", "PATCH");
+                    datos.append("action", "actualizar_datos");
+                    datos.append("id", this.registry.id);
+                    var route = 'origin/' + this.registry.id;
+
+                    axios
+                    .post(route, datos)
+                    .then(response => {
+                        if (response.data.success) {
+                            this.$emit('updateView');
+                        }
+                    })
+                    .catch(error => console.log(error))
+                }
+            },
+
+            //  Carga un grupo especifico de Misc en un select;
+            loadTypesOrigin ( ) {
                 axios
                 .get('getMisc?group=1')
                 .then(listado => {
                     var countObj = Object.keys(listado.data).length;
                     if (countObj > 0) {
                         for (var i = 0; i < countObj; i++) {
-                            this.tiposOrigenes.push(listado.data[i]);
+                            this.typesOrigins.push(listado.data[i]);
                         }
                     }
                 })
             },
 
-            /* Obtiene los datos de un formulario especifico */
-
-            getDataForm: function(){
-              let datos = new FormData();
-              datos.append("nombre_origen", this.registry.nombre_origen);
-              datos.append("tipo_origen", this.registry.tipo_origen);
-              datos.append("estado_origen", this.registry.estado_origen);
-              return datos;
+            // Obtiene los datos de un formulario especifico. 
+            getDataForm ( ) {
+                let datos = new FormData();
+                datos.append("name", this.registry.name);
+                datos.append("misc_id", this.registry.misc_id);
+                datos.append("state", this.registry.state);
+                return datos;
             },
 
-            /* Envia al parent la orden de ocultar el form. */
+            // Valida el formulario de carga/edicion.
+            validateForm ( e ){
+                this.data = this.registry;
+                //this.list = this.listElements;
+                //this.length = this.list.length;
+                this.errors = [];
 
-            clearView: function(){
-              this.$emit('clearView', 0);
+                if (this.data.name && this.data.misc_id && this.data.state) {
+                    return this.errors;
+                }
+
+                if (!this.data.name) {
+                    this.errors.push('Nombre requerido.');
+                }
+             
+                /*this.errors.push(this.length);
+                for(var i = 0; i < length; i++) {
+                    if(this.listElements[i].name.toLowerCase() == this.data.name.toLowerCase()){ 
+                        this.errors.push('El nombre que intenta asignar ya existe en la base de datos.');
+                        break;
+                    }
+                }*/
+
+                if (!this.data.misc_id) {
+                    this.errors.push('Tipo requerido.');
+                }
+                if (!this.data.state) {
+                    this.errors.push('Estado requerido.');
+                }
+
+                return this.errors;
             },
 
-            /* Recorre y vacia los datos cargados en la vista de un form. */
-
-            clearForm(){
-              var self = this;
-              Object.keys(this.registry).forEach(function(key,index) {
-                self.registry[key] = '';
-              });
+            // Envia al parent la orden de ocultar el form.
+            clearView ( ) {
+                this.$emit( 'clearView', 0 );
             },
 
-        },
+            // [GLOBAL] Recorre y vacia los datos cargados en la vista de un form.
+            clearForm ( ) {
+                var self = this;
+                Object.keys(this.registry).forEach(function(key,index) {
+                    self.registry[key] = '';
+                });
+            },
+
+            // [GLOBAL] verifica si existe un elemento en un array y lo devuelve.
+            inArray ( needle, haystack ) {
+                var length = haystack.length;
+                for(var i = 0; i < length; i++) {
+                    if(haystack[i].id == needle) return haystack[i];
+                }
+                return false;
+            },
+
+        }, // Methods.
     }
 </script>
+
+<style type="text/css">
+    .div-padre{
+        width: 100%;
+    }
+</style>

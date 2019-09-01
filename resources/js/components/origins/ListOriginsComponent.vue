@@ -1,11 +1,10 @@
 <template>
     <div class="container-fluid">
-
         <form-origins-component
           :listElements="listElements" 
           :operation = this.operation
           :registry = 'dataReg'
-          @cerrar = "operation = 0"
+          @updateView = "updateView"
           @clearView="clearView"
           @pushData="pushData"
           v-if="this.operation > 0"
@@ -13,25 +12,49 @@
 
         <br>
 
-        <div class="row">
+        <div class="row alert alert-primary">
             <div class="col text-left">
                 <h4 class="text-left">Origenes Actualmente Cargados</h4>
             </div>
-            <div class="col text-right">
-                <button type="button" name="button" class="btn btn-sm btn-info" @click="clearView(1)">NUEVO ORIGEN</button>
-                <a href="#" class="btn btn-outline-success btn-sm">Imprimir Listado</a>
+            <div class="col text-right ptop">
+                <button 
+                    @click="clearView(1)"
+                    class="btn btn-sm btn-dark" 
+                    id="nuevo_origen" 
+                    name="button" 
+                    type="button" 
+                >NUEVO ORIGEN</button>
+
+                <a 
+                    class="btn btn-outline-success btn-sm"
+                    href="#" 
+                >Imprimir Listado</a>
             </div>
         </div>
+
         <br>
+        
         <div class="row">
             <div class="col">
-                <input type="text" class="form-control input-sm" name="busqueda" placeholder="Filtrar Datos" v-model="term" autofocus="">
+                <input 
+                    autofocus=""
+                    class="form-control input-sm" 
+                    name="busqueda" 
+                    placeholder="Filtrar Datos" 
+                    type="text" 
+                    v-model="term" 
+                >
             </div>
         </div>
+        
         <br>
+        
         <div class="row">
+            
             <div class="col">
-                <table class="table table-striped">
+            
+                <table class="table table-origins">
+                    
                     <thead class="thead-dark">
                         <tr>
                             <th class="text-left">Nombre</th>
@@ -56,14 +79,14 @@
                                     type="button" 
                                     class="btn btn-sm btn-width"
                                     @click="changeStateOrigin(element, index)"
-                                    value="Desactivar"
-                                    v-bind:class="(element.state === 'active') ?  'btn-dark' : 'btn-success' "
+                                    v-bind:value="(element.state === 'active') ?  'Desactivar' : 'Activar'"
+                                    v-bind:class="(element.state === 'active') ?  'btn-success' : 'btn-dark' "
                                 >
 
                                 <input 
                                     type="button" 
                                     class="btn btn-sm btn-primary btn-width" 
-                                    @click="" 
+                                    @click="editOrigin(element, index)" 
                                     value="Editar"
                                 >
                                 <input 
@@ -85,51 +108,58 @@
                             </th>
                         </tr>
                     </tfoot>
+
                 </table>
+
             </div>
+
         </div>
 
         <hr>
 
     </div>
+
 </template>
 
 <script>
-    export default {
-        data(){
+    export default 
+    {
+        data()
+        {
             return {
                 success: false,         // true <- muestra listado | false <- muestra mjs sin resultados.
                 operation: 0,           // 0 listado, 1 alta, 2 edita.
-                dataReg: [],            // Datos del origen nuevo. 'registry'
+                dataReg: [],            // Datos del origen nuevo/edicion. 'registry', 
                 listElements: [],       // Listado de origenes.
                 term: '',               // Termino de Busqueda.
             }
         },
 
-        mounted() {
-            console.log('Listado de Origenes Cargado.')
-            this.cargarListado();
+        mounted() 
+        { 
+            this.loadList();
+
 
         }, // Mounted.
 
-        computed: {
+        computed: 
+        {
 
-            /* Filtro del Listado, por Apellido y Nombre. */
-
+            // Filtro del Listado, por Apellido y Nombre.
             arrayFilter: function(){
               return this.listElements.filter(
                 (element) => element.name.toLowerCase().includes(this.term.toLowerCase())
                 || element.misc_name.toLowerCase().includes(this.term.toLowerCase())
               )
-            }
+            },
 
         }, // Computed.
 
 
-        methods: {
-            
-            /* Carga el listado inicial desde la db.  */
-            cargarListado: function(){
+        methods: 
+        {
+            // Carga el listado inicial desde la db. 
+            loadList: function(){
                 axios
                 .get('origin')
                 .then(listado => {
@@ -143,7 +173,7 @@
                 })
             },
 
-            /* Cambiar el estado del Origen, para que pueda ser utilizado o no. */
+            // Cambiar el estado del Origen, para que pueda ser utilizado o no.
             changeStateOrigin:  function(data, index){
                 
                 let params = new FormData();
@@ -161,7 +191,13 @@
                 .catch(error => console.log(error))
             },
 
+            // Editar un registro especifico.
+            editOrigin: function(data, index){
+                this.dataReg = data;
+                this.operation = 2;
+            },
 
+            // Elimina un elemento de la DB y de la vista.
             deleteOrigin: function(data, index){
               if (confirm("Desea eliminar este Origen?")) {
                 axios
@@ -169,6 +205,7 @@
                 .then( response => {
                   if (response.data.success) {
                     this.listElements.splice(index, 1);
+                    this.term = '';
                     if (this.listElements.length == 0) {
                       this.success = false;
                     }
@@ -177,20 +214,24 @@
               }
             },
 
-            /* Carga en la vista un nuevo elemento y lo muestra. */
-
+            // Carga en la vista un nuevo elemento y lo muestra.
             pushData(data){
               this.listElements.push(data);
               this.success = true;
               this.operation = 0;
+              document.getElementById('nuevo_origen').focus();
             },
 
-            /* Establece la vista segun se indique. */
-
+            // Establece la vista segun se indique.
             clearView(param){
               this.dataReg = [];
               this.operation = param;
+            },
 
+            // Refresca la vista luego de actualizar un elemento especifico, recibe el elemento actualizado.
+            updateView(){
+                this.listElements[this.dataReg.index] = this.dataReg;
+                this.operation = 0;
             },
 
         }, // Methods.
@@ -202,4 +243,13 @@
     .btn-width{
         width: 80px;
     }
+
+    .table-origins tbody tr:hover {
+        background: #eeee;
+    }
+
+    .ptop{
+        padding-top: 5px;
+    }
+
 </style>
