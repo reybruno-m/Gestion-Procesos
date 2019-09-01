@@ -1993,23 +1993,26 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     // Guarda un registro en la db y lo carga en la vista.
     saveRegistry: function saveRegistry() {
+      var _this = this;
+
       var datos = this.getDataForm();
-      console.log(this.validateForm(datos));
-      /*if (!this.validateForm(datos).length) {
-          var route = 'origin';
-          axios
-          .post(route, datos)
-          .then(response => {
-              alert(response.data.msj);
-              this.$emit('pushData', response.data.elements);
-              this.clearForm();
-           })
-          .catch(error => console.log(error))
-      }*/
+
+      if (!this.validateForm(datos).length) {
+        var route = 'origin';
+        axios.post(route, datos).then(function (response) {
+          alert(response.data.msj);
+
+          _this.$emit('pushData', response.data.elements);
+
+          _this.clearForm();
+        })["catch"](function (error) {
+          return console.log(error);
+        });
+      }
     },
     // Actualiza un registro en la db y en la vista.
     updateRegistry: function updateRegistry() {
-      var _this = this;
+      var _this2 = this;
 
       var datos = this.getDataForm();
       var response = this.inArray(this.registry.misc_id, this.typesOrigins);
@@ -2022,7 +2025,7 @@ __webpack_require__.r(__webpack_exports__);
         var route = 'origin/' + this.registry.id;
         axios.post(route, datos).then(function (response) {
           if (response.data.success) {
-            _this.$emit('updateView');
+            _this2.$emit('updateView');
           }
         })["catch"](function (error) {
           return console.log(error);
@@ -2031,14 +2034,14 @@ __webpack_require__.r(__webpack_exports__);
     },
     //  Carga un grupo especifico de Misc en un select;
     loadTypesOrigin: function loadTypesOrigin() {
-      var _this2 = this;
+      var _this3 = this;
 
       axios.get('getMisc?group=1').then(function (listado) {
         var countObj = Object.keys(listado.data).length;
 
         if (countObj > 0) {
           for (var i = 0; i < countObj; i++) {
-            _this2.typesOrigins.push(listado.data[i]);
+            _this3.typesOrigins.push(listado.data[i]);
           }
         }
       });
@@ -2053,9 +2056,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     // Valida el formulario de carga/edicion.
     validateForm: function validateForm(e) {
-      this.data = this.registry;
-      this.list = this.listElements;
-      this.length = this.list.length;
+      this.data = this.registry; //this.list = this.listElements;
+      //this.length = this.list.length;
+
       this.errors = [];
 
       if (this.data.name && this.data.misc_id && this.data.state) {
@@ -2082,7 +2085,7 @@ __webpack_require__.r(__webpack_exports__);
         this.errors.push('Estado requerido.');
       }
 
-      return this.list;
+      return this.errors;
     },
     // Envia al parent la orden de ocultar el form.
     clearView: function clearView() {
