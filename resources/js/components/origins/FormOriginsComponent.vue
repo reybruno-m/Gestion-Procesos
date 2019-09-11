@@ -147,9 +147,10 @@
                         alert(response.data.msj);
                         this.$emit('pushData', response.data.elements);
                         this.clearForm();
-
                     })
-                    .catch(error => console.log(error))
+                    .catch(error => {
+                        console.log(error.message)
+                    })
                 }
             },
 
@@ -202,8 +203,6 @@
             // Valida el formulario de carga/edicion.
             validateForm ( e ){
                 this.data = this.registry;
-                //this.list = this.listElements;
-                //this.length = this.list.length;
                 this.errors = [];
 
                 if (this.data.name && this.data.misc_id && this.data.state) {
@@ -213,14 +212,6 @@
                 if (!this.data.name) {
                     this.errors.push('Nombre requerido.');
                 }
-             
-                /*this.errors.push(this.length);
-                for(var i = 0; i < length; i++) {
-                    if(this.listElements[i].name.toLowerCase() == this.data.name.toLowerCase()){ 
-                        this.errors.push('El nombre que intenta asignar ya existe en la base de datos.');
-                        break;
-                    }
-                }*/
 
                 if (!this.data.misc_id) {
                     this.errors.push('Tipo requerido.');

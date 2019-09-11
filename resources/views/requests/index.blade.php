@@ -4,8 +4,10 @@
 
 @section('content')
 
-<div class="fixedContainer">
-	
+<div class="fixedContainer" id="requests">
+
+	<list-requests-component></list-requests-component>
+ 
 </div>
 
 @endsection

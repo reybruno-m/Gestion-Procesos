@@ -3,6 +3,10 @@
 namespace it\Http\Controllers;
 
 use Illuminate\Http\Request;
+use it\Misc;
+use it\User;
+use it\Origin;
+use DB;
 
 class RequestController extends Controller
 {
@@ -18,7 +22,15 @@ class RequestController extends Controller
 
     public function index()
     {
-        return view("requests.index");
+        $requests = DB::table('requests AS r')
+            ->join('misc AS m', 'r.misc_id', '=', 'm.id')
+            ->join('users AS u', 'r.user_id', '=', 'u.id')
+            ->join('origins AS o', 'r.origin_id', '=', 'o.id')
+            ->select('r.*', 'm.id AS pk_misc', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->orderBy('r.created_at', 'desc')
+            ->get();
+
+        return $requests;        
     }
 
     /**
@@ -39,7 +51,7 @@ class RequestController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
     }
 
     /**
@@ -50,7 +62,15 @@ class RequestController extends Controller
      */
     public function show($id)
     {
-        //
+        $requests = DB::table('requests AS r')
+            ->join('misc AS m', 'r.misc_id', '=', 'm.id')
+            ->join('users AS u', 'r.user_id', '=', 'u.id')
+            ->join('origins AS o', 'r.origin_id', '=', 'o.id')
+            ->select('r.*', 'm.id', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->where('r.id', $id)
+            ->get();
+
+        dd($requests);        
     }
 
     /**

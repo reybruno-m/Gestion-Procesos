@@ -24,11 +24,8 @@
                     name="button" 
                     type="button" 
                 >NUEVO ORIGEN</button>
-
-                <a 
-                    class="btn btn-outline-success btn-sm"
-                    href="#" 
-                >Imprimir Listado</a>
+                
+                <input type="button" class="btn btn-primary btn-sm" value="Imprimir Listado">
             </div>
         </div>
 

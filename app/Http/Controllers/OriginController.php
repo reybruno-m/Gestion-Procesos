@@ -51,11 +51,16 @@ class OriginController extends Controller
             $misc_id = ucwords(addslashes($request->input('misc_id'))); # ID
             $state = addslashes($request->input('state'));
 
+            $verificar_existencia = DB::table('origins')->where('name', '=', $name)->get();
+
+            /*if (count($verificar_existencia) > 0)
+                throw new \Exception("El origen que intenta cargar ya existe.");
+
             if ($name == '')
                 throw new \Exception("El nombre de origen no puede estar vacio.");
 
             if (!is_numeric($misc_id))
-                throw new \Exception("El tipo de origen no puede estar vacio.");
+                throw new \Exception("El tipo de origen no puede estar vacio.");*/
 
             $misc_tipo = Misc::find($misc_id);
 
@@ -73,7 +78,7 @@ class OriginController extends Controller
             $this->response['msj'] = "Registro guardado con exito.";
             
         } catch (Exception $e) {
-            $this->response['msj'] = $e->getMessage();
+           $this->response['msj'] = $e->getMessage();
         }
 
         return $this->response;

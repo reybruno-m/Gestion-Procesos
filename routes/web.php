@@ -29,6 +29,11 @@ Route::get('/origins', function () {
     return view('origins.index');
 })->middleware('auth');
 
+
+Route::get('/requests', function () {
+    return view('requests.index');
+})->middleware('auth');
+
 /*
 	Generar Reportes.
 */
@@ -37,21 +42,10 @@ Route::resource('/reports', 'ReportController', [
     'only' => ['index', 'create', 'store']
 ]);
 
-/*
-	ABM Peticiones Area Principal de Trabajo. 
-*/
 
-Route::resource('/requests', 'RequestController', [
-    'only' => ['index', 'create', 'store']
-]);
 
 
 Auth::routes();
-
-# Route::get('/home', 'HomeController@index')->name('home');
-
-
-// Rutas de Datos
 
 /*
     Listado de Origenes.
@@ -61,7 +55,19 @@ Route::resource('/origin', 'OriginController', [
 ]);
 
 /*
-    Tipos de Origenes
+    ABM Peticiones Area Principal de Trabajo. 
+*/
+
+Route::resource('/request', 'RequestController', [
+    'except' => ['create']
+]);
+
+
+
+
+
+/*
+    Metodos Especificos
 */
 
 Route::get('/getMisc', 'MiscController@getMiscGroup');
