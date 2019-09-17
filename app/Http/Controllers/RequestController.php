@@ -15,10 +15,12 @@ class RequestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-     public function __construct()
-     {
-       $this->middleware('auth');
-     }
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->response['msj'] = "";
+        $this->response['success'] = false;
+    }
 
     public function index()
     {
@@ -27,7 +29,7 @@ class RequestController extends Controller
             ->join('users AS u', 'r.user_id', '=', 'u.id')
             ->join('origins AS o', 'r.origin_id', '=', 'o.id')
             ->select('r.*', 'm.id AS pk_misc', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
-            ->orderBy('r.created_at', 'desc')
+            ->orderBy('r.id', 'desc')
             ->get();
 
         return $requests;        
@@ -52,6 +54,55 @@ class RequestController extends Controller
     public function store(Request $request)
     {
 
+        // Mensajes de respuesta.
+        $messages = [
+            'origin_id.required' => 'Debe seleccionar un origen del listado.',
+            'origin_id.integer' => 'Debe seleccionar un origen del listado.',
+            'description.min' =>'La descripcion debe contener al menos 10 caracteres.',
+            'misc_id.required' => 'Debe seleccionar una prioridad del listado.',
+            'misc_id.integer' => 'Debe seleccionar una prioridad del listado.',
+        ];
+
+        // Reglas de validación.
+        $rules = [
+                'origin_id'     => 'required|integer',
+                'description'   => 'required|min:10',
+                'misc_id'       => 'required|integer',
+            ];
+        
+        $validator = \Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return [
+                'success' => false,
+                'errors'  => $validator->errors()->all()
+            ];
+        }
+
+        DB::table('requests')->insert(
+            [
+                'description' => addslashes($request->input('description')), 
+                'misc_id' => $request->input('misc_id'),
+                'user_id' => auth()->user()->id,
+                'origin_id' => $request->input('origin_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]   
+        );
+
+        $elements = DB::table('requests AS r')
+            ->join('misc AS m', 'r.misc_id', '=', 'm.id')
+            ->join('users AS u', 'r.user_id', '=', 'u.id')
+            ->join('origins AS o', 'r.origin_id', '=', 'o.id')
+            ->select('r.*', 'm.id AS misc_pk', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return [
+            'success' => true,
+            'elements' => $elements,
+        ];
+
     }
 
     /**
@@ -66,7 +117,7 @@ class RequestController extends Controller
             ->join('misc AS m', 'r.misc_id', '=', 'm.id')
             ->join('users AS u', 'r.user_id', '=', 'u.id')
             ->join('origins AS o', 'r.origin_id', '=', 'o.id')
-            ->select('r.*', 'm.id', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->select('r.*', 'm.id AS misc_pk', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
             ->where('r.id', $id)
             ->get();
 
@@ -93,7 +144,7 @@ class RequestController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        
     }
 
     /**

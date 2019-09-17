@@ -22,8 +22,6 @@ class OriginController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->response['msj'] = "";
-        $this->response['success'] = false;
     }
 
     public function index()
@@ -32,6 +30,7 @@ class OriginController extends Controller
             ->join('misc AS m', 'o.misc_id', '=', 'm.id')
             ->select('o.*', 'm.name AS misc_name', 'm.group AS misc_group')
             ->orderBy('o.name', 'asc')
+            //->where('state', '=', 'active')
             ->get();
 
         return $origins;        
@@ -45,43 +44,57 @@ class OriginController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            
-            $name = ucwords(addslashes($request->input('name')));
-            $misc_id = ucwords(addslashes($request->input('misc_id'))); # ID
-            $state = addslashes($request->input('state'));
+        $response = [];
+        
+        $usado = DB::table('origins')
+            ->where('name', '=', ucwords(strtolower($request->input('name'))))
+            ->count();
 
-            $verificar_existencia = DB::table('origins')->where('name', '=', $name)->get();
+        $messages = [
+            'name.required' => 'El nombre no puede estar vacio.',
+            'name.max' => 'El nombre no puede superar los 100 caracteres.',
+            'misc_id.required' => 'El tipo de origen no puede estar vacio.',
+            'state.integer' => 'El estado inicial no puede estar vacio.',
+        ];
 
-            /*if (count($verificar_existencia) > 0)
-                throw new \Exception("El origen que intenta cargar ya existe.");
+        $rules = [
+            'name'     => 'required|string|max:100',
+            'misc_id'  => 'required|integer',
+            'state'    => 'required|string', 
+        ];
 
-            if ($name == '')
-                throw new \Exception("El nombre de origen no puede estar vacio.");
+        $validator = \Validator::make($request->all(), $rules, $messages);
 
-            if (!is_numeric($misc_id))
-                throw new \Exception("El tipo de origen no puede estar vacio.");*/
+        if ($validator->fails() || $usado > 0) {
 
-            $misc_tipo = Misc::find($misc_id);
+            if ($usado > 0) {
+                $name = ucwords(strtolower($request->input('name')));
+                $validator->errors()->add('', 'El origen ' . $name . " Ya se encuentra cargado.");
+            }
+
+            $response['success'] = false;
+            $response['errors'] = $validator->errors()->all();
+            return $response;
+
+        }else{
 
             $origin = new Origin();
-
-            $origin->name = $name;
-            $origin->misc_id = $misc_id;
-            $origin->state = $state;
+            
+            $origin->name = ucwords(strtolower($request->input('name')));
+            $origin->misc_id = $request->input('misc_id');
+            $origin->state = $request->input('state');
+            
             $origin->save();
 
-            $origin->misc_name = $misc_tipo->name;
+            $tipo_origen = Misc::find($request->input('misc_id'));
+            $origin->misc_name = $tipo_origen->name;
 
-            $this->response['elements'] = $origin;
-            $this->response['success'] = true;
-            $this->response['msj'] = "Registro guardado con exito.";
-            
-        } catch (Exception $e) {
-           $this->response['msj'] = $e->getMessage();
+            $response['success'] = true;
+            $response['msj'] = 'Registro guardado con exito.';
+            $response['elements'] = $origin;
+
+            return $response; 
         }
-
-        return $this->response;
     }
 
     /**
@@ -90,10 +103,10 @@ class OriginController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    /*public function show($id)
     {
         //
-    }
+    }*/
 
     /**
      * Show the form for editing the specified resource.
@@ -101,10 +114,10 @@ class OriginController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    /*public function edit($id)
     {
         //
-    }
+    }*/
 
     /**
      * Update the specified resource in storage.
@@ -116,61 +129,44 @@ class OriginController extends Controller
     public function update(Request $request, $id)
     {
 
-        try {
+        $response = [];
 
-            $id = addslashes($request->input('id'));
-            $action = addslashes($request->input('action'));
+        $messages = [
+            'id.required' => 'Error al procesar la solicitud.',
+            'name.required' => 'Debe indicar un nombre valido.',
+            'name.max' => 'El nombre no puede superar los 100 caracteres.',
+            'misc_id.required' => 'Debe seleccionar un tipo del listado.',
+            'state.integer' => 'Debe seleccionar un estado inicial.',
+        ];
 
-            if (!is_numeric($id))
-                throw new \Exception("Error, Indice no definido.");
+        $rules = [
+            'id'        => 'required|integer',
+            'name'      => 'required|string|max:100',
+            'misc_id'   => 'required|integer',
+            'state'     => 'required|string',
+        ];
 
-            $origin = array();
-            $origin = Origin::findOrFail($id);
+        $validator = \Validator::make($request->all(), $rules, $messages);
 
-            switch ($action) 
-            {
-                case 'cambiar_estado':
-                
-                    if ($origin->state == 'active') {
-                        $origin->state = 'inactive';
-                        $this->response['msj'] = "Registro Desactivado con exito.";
-                    }else{
-                        $origin->state = 'active';
-                        $this->response['msj'] = "Registro Activado con exito.";
-                    }
-
-                    break;
-
-                case 'actualizar_datos':
-
-                    $name = addslashes(ucwords($request->input('name')));
-                    $misc_id = addslashes($request->input('misc_id'));
-                    $state = addslashes(strtolower($request->input('state')));
-
-                    if ($name == "") throw new \Exception("El nombre del origen no puede estar vacio");
-                    if (!is_numeric($misc_id)) throw new \Exception("El tipo de origen no puede estar vacio");
-                    if ($state == "") throw new \Exception("El estado de origen no puede estar vacio");
-                    
-                    $origin->name = $request->input('name');
-                    $origin->misc_id = $request->input('misc_id');
-                    $origin->state = $request->input('state');
-
-                    break;
-                
-                default:
-                    //throw new \Exception("Error, Accion no definida.");
-                    break;
-            }
-
-            $origin->save();
-            $this->response['element'] = $origin;
-            $this->response['success'] = true;
-            
-        } catch (Exception $e) {
-            $this->response['msj'] = $e->getMessage();
+        if ($validator->fails()) {
+            $response['success'] = false;
+            $response['errors'] = $validator->errors()->all();
+            return $response;
         }
 
-        return $this->response;       
+        $origin = Origin::find($request->input('id'));
+
+        $origin->name = ucwords(strtolower($request->input('name')));
+        $origin->misc_id = $request->input('misc_id');
+        $origin->state = $request->input('state');
+
+        $response['success'] = true;
+        $response['msj'] = "Registro actualizado con exito.";
+
+        $origin->save();
+        $response['element'] = $origin;
+
+        return $response;       
     }
 
     /**
@@ -181,20 +177,71 @@ class OriginController extends Controller
      */
     public function destroy($id)
     {
-        try {
-
-            if (!is_numeric($id)) throw new \Exception("El parametro indicado no es correcto.");
-
-            $origin = Origin::find($id);
-            $origin->delete();
+        $response = [];
         
-            $this->response['success'] = true;
-            $this->response['msj'] = "Origen eliminado con exito.";
-
-        } catch (\Exception $e) {
-            $msj = $e->getMessage();
+        if (!is_numeric($id)) {
+            
+            $response['success'] = false;
+            $response['errors'] = array("El registro no puede ser eliminado.");
+            return $response; 
         }
 
-        return $this->response;
+        $cantidad = DB::table('requests')
+            ->where('origin_id', '=', $id)
+            ->count();
+
+        if ($cantidad > 0) {
+
+            $response['success'] = false;
+            $response['errors'] = array("El Origen que intenta eliminar se encuentra actualmente en uso en " . $cantidad . " solicitudes.");
+
+            return $response; 
+        }  
+
+        $origin = Origin::find($id);
+        $origin->delete();
+
+        $response['success'] = true;
+        $response['msj'] = "Origen eliminado con exito.";
+        
+        return $response; 
     }
+
+    /*
+        Modifica el estado actual de un origen.
+    */
+
+    public function changeState($id)
+    {
+        $response = [];
+        
+        if (!is_numeric($id)) {
+            
+            $response['success'] = false;
+            $response['errors'] = array("El registro no puede ser eliminado.");
+            return $response; 
+        }
+
+        $origin = Origin::findOrFail($id);
+
+        if ($origin->state == 'active') {
+
+            $origin->state = 'inactive';
+            $response['msj'] = "Registro Desactivado con exito.";
+        
+        }else{
+        
+            $origin->state = 'active';
+            $response['msj'] = "Registro Activado con exito.";
+        
+        }
+
+        $origin->save();
+        
+        $response['success'] = true;
+        $response['element'] = $origin;
+        
+        return $response;       
+    }
+
 }
