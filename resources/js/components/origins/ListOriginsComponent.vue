@@ -1,7 +1,9 @@
 <template>
     <div class="container-fluid">
+        
+        <!-- Formulario de Carga, Edicion de Origen -->
         <form-origins-component
-          :listElements="listElements" 
+          :listOrigins="listOrigins" 
           :operation = this.operation
           :registry = 'dataReg'
           @updateView = "updateView"
@@ -30,7 +32,14 @@
         </div>
 
         <br>
+
+        <div class="container-fluid" v-if="errors.length">
+            <div class="alert alert-danger" role="alert" v-for="error in errors">
+                <b>{{ error }}</b>
+            </div>
+        </div>
         
+
         <div class="row">
             <div class="col">
                 <input 
@@ -127,8 +136,9 @@
                 success: false,         // true <- muestra listado | false <- muestra mjs sin resultados.
                 operation: 0,           // 0 listado, 1 alta, 2 edita.
                 dataReg: [],            // Datos del origen nuevo/edicion. 'registry', 
-                listElements: [],       // Listado de origenes.
+                listOrigins: [],        // Listado de origenes.
                 term: '',               // Termino de Busqueda.
+                errors: [],             // Registra errores, para la validacion.
             }
         },
 
@@ -136,15 +146,13 @@
         { 
             this.loadList();
 
-
         }, // Mounted.
 
         computed: 
         {
-
             // Filtro del Listado, por Apellido y Nombre.
             arrayFilter: function(){
-              return this.listElements.filter(
+              return this.listOrigins.filter(
                 (element) => element.name.toLowerCase().includes(this.term.toLowerCase())
                 || element.misc_name.toLowerCase().includes(this.term.toLowerCase())
               )
@@ -164,73 +172,64 @@
                     if (countObj > 0) {
                         this.success = true;
                         for (var i = 0; i < countObj; i++) {
-                            this.listElements.push(listado.data[i]);
+                            this.listOrigins.push(listado.data[i]);
                         }
                     }
                 })
             },
-
             // Cambiar el estado del Origen, para que pueda ser utilizado o no.
             changeStateOrigin:  function(data, index){
-                
-                let params = new FormData();
-                params.append("id", data.id);
-                params.append("_method", "PATCH");
-                params.append("action", "cambiar_estado");
-
                 axios
-                .post('origin/' + data.id, params)
+                .post('changeState/' + data.id)
                 .then(response => {
                     if (response.data.success) {
-                        this.listElements[index].state = response.data.element.state;
+                        this.listOrigins[index].state = response.data.element.state;
                     }
                 })
                 .catch(error => console.log(error))
             },
-
             // Editar un registro especifico.
             editOrigin: function(data, index){
                 this.dataReg = data;
                 this.operation = 2;
             },
-
             // Elimina un elemento de la DB y de la vista.
             deleteOrigin: function(data, index){
               if (confirm("Desea eliminar este Origen?")) {
                 axios
                 .delete('origin/' + data.id)
                 .then( response => {
-                  if (response.data.success) {
-                    this.listElements.splice(index, 1);
-                    this.term = '';
-                    if (this.listElements.length == 0) {
-                      this.success = false;
+                    this.errors = [];
+                    if (response.data.success) {
+                        this.listOrigins.splice(index, 1);
+                        this.term = '';
+                        if (this.listOrigins.length == 0) {
+                            this.success = false;
+                        }
+                        alert(response.data.msj);
+                    }else{
+                        this.errors.push(response.data.errors[0]);
                     }
-                  }
                 })
               }
             },
-
             // Carga en la vista un nuevo elemento y lo muestra.
             pushData(data){
-              this.listElements.push(data);
+              this.listOrigins.push(data);
               this.success = true;
               this.operation = 0;
               document.getElementById('nuevo_origen').focus();
             },
-
             // Establece la vista segun se indique.
             clearView(param){
               this.dataReg = [];
               this.operation = param;
             },
-
             // Refresca la vista luego de actualizar un elemento especifico, recibe el elemento actualizado.
             updateView(){
-                this.listElements[this.dataReg.index] = this.dataReg;
+                this.listOrigins[this.dataReg.index] = this.dataReg;
                 this.operation = 0;
             },
-
         }, // Methods.
 
     }

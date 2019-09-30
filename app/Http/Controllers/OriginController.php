@@ -11,8 +11,7 @@ use DB;
 class OriginController extends Controller
 {
 
-    public $response = array();
-
+   // public $response = array();
 
     /**
      * Display a listing of the resource.
@@ -28,7 +27,11 @@ class OriginController extends Controller
     {
         $origins = DB::table('origins AS o')
             ->join('misc AS m', 'o.misc_id', '=', 'm.id')
-            ->select('o.*', 'm.name AS misc_name', 'm.group AS misc_group')
+            ->select(
+                'o.*', 
+                'm.name AS misc_name', 
+                'm.group AS misc_group'
+            )
             ->orderBy('o.name', 'asc')
             //->where('state', '=', 'active')
             ->get();

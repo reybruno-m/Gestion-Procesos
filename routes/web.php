@@ -1,29 +1,14 @@
 <?php
-
 Route::get('/', function () {
+    return view('inicio');
+});
+Route::get('/inicio', function () {
     return view('inicio');
 });
 
 /*
-	Perfil de Usuario, Cambio de datos personales.
+	Vistas
 */
-
-Route::resource('/account', 'AccountController', [
-    'only' => ['index']
-]);
-
-/*
-	Modulo Administrativo.
-*/
-
-Route::resource('/management', 'ManagementController', [
-    'only' => ['index']
-]);
-
-/*
-	ABM Origenes, Sectores/Personas
-*/
-
 
 Route::get('/origins', function () {
     return view('origins.index');
@@ -34,42 +19,47 @@ Route::get('/requests', function () {
     return view('requests.index');
 })->middleware('auth');
 
-/*
-	Generar Reportes.
-*/
-
-Route::resource('/reports', 'ReportController', [
-    'only' => ['index', 'create', 'store']
-]);
-
-
-
 
 Auth::routes();
 
 /*
-    Listado de Origenes.
+    Rutas Axios para ABM de registros.
 */
+
 Route::resource('/origin', 'OriginController', [
     'except' => ['create']
 ]);
 
-/*
-    ABM Peticiones Area Principal de Trabajo. 
-*/
+Route::resource('/state', 'StateController', [
+    'except' => ['create']
+]);
 
 Route::resource('/request', 'RequestController', [
     'except' => ['create']
 ]);
 
+Route::resource('/movement', 'MovementController', [
+    'except' => ['create']
+]);
+
+Route::resource('/reports', 'ReportController', [
+    'only' => ['index', 'create', 'store']
+]);
+
+Route::resource('/account', 'AccountController', [
+    'only' => ['index']
+]);
 
 
-
+Route::resource('/management', 'ManagementController', [
+    'only' => ['index']
+]);
 
 /*
-    Metodos Especificos
+    Metodos Agregados
 */
 
+Route::post('/changeState/{id}', 'OriginController@changeState');
 Route::get('/getMisc', 'MiscController@getMiscGroup');
 Route::get('/getMiscByID', 'MiscController@getMiscByID');
 

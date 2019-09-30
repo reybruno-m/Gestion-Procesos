@@ -13,6 +13,7 @@ class StatesTableSeeder extends Seeder
     {
 
     	$states = array(
+            'Inicial',
     		'Pendiente',
     		'Tomado',
     		'Pausado',

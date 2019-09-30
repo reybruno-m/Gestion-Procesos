@@ -74,7 +74,7 @@
                 <div class="col text-center">
                     <input 
                         @click="clearView()" 
-                        class="btn btn-outline-danger" 
+                        class="btn btn-danger" 
                         tabindex="5" 
                         type="button" 
                         value="CANCELAR" 
@@ -83,8 +83,8 @@
 
                 <div class="col text-center" v-if="operation === 1">
                     <input 
-                        @click="saveRegistry()"
-                        class="btn btn-outline-success" 
+                        @click="saveOrigin()"
+                        class="btn btn-success" 
                         tabindex="4" 
                         type="button" 
                         value="CARGAR" 
@@ -93,8 +93,8 @@
 
                 <div class="col text-center" v-if="operation === 2">
                     <input 
-                        @click="updateRegistry()"
-                        class="btn btn-outline-success" 
+                        @click="updateOrigin()"
+                        class="btn btn-success" 
                         tabindex="4" 
                         type="button" 
                         value="GUARDAR" 
@@ -117,7 +117,7 @@
         props: [
             'operation',    // Configura la vista en base a si se esta editando, creando o listando los elementos.
             'registry',     // Contiene los elementos de un nuevo registro.
-            'listElements',
+            'listOrigins',
         ],
 
         data()
@@ -137,32 +137,33 @@
         methods: 
         {
             // Guarda un registro en la db y lo carga en la vista.
-            saveRegistry ( ) {
+            saveOrigin ( ) {
                 var datos = this.getDataForm();
                 if (!this.validateForm(datos).length) {
                     var route = 'origin';
                     axios
                     .post(route, datos)
-                    .then(response => {
-                        alert(response.data.msj);
-                        this.$emit('pushData', response.data.elements);
-                        this.clearForm();
+                    .then(res => {
+                        if (res.data.success) {
+                            this.$emit('pushData', res.data.elements);
+                            this.clearForm();
+                        }else{
+                            this.validateForm(res.data.errors, true)
+                        }
                     })
                     .catch(error => {
                         console.log(error.message)
                     })
                 }
             },
-
             // Actualiza un registro en la db y en la vista.
-            updateRegistry ( ) {
+            updateOrigin ( ) {
                 const datos = this.getDataForm();
                 var response = this.inArray(this.registry.misc_id, this.typesOrigins);
                 this.registry.misc_name = response.name;
 
                 if (!this.validateForm(datos).length) {
                     datos.append("_method", "PATCH");
-                    datos.append("action", "actualizar_datos");
                     datos.append("id", this.registry.id);
                     var route = 'origin/' + this.registry.id;
 
@@ -176,8 +177,7 @@
                     .catch(error => console.log(error))
                 }
             },
-
-            //  Carga un grupo especifico de Misc en un select;
+            //  Carga un grupo especifico de Misc en arreglo;
             loadTypesOrigin ( ) {
                 axios
                 .get('getMisc?group=1')
@@ -190,7 +190,6 @@
                     }
                 })
             },
-
             // Obtiene los datos de un formulario especifico. 
             getDataForm ( ) {
                 let datos = new FormData();
@@ -199,35 +198,36 @@
                 datos.append("state", this.registry.state);
                 return datos;
             },
-
             // Valida el formulario de carga/edicion.
-            validateForm ( e ){
-                this.data = this.registry;
+            validateForm ( e, axios = false ){
                 this.errors = [];
-
+                // VALIDA BACK.
+                if (axios) {
+                    for (var i = 0; i < e.length; i++) {
+                        this.errors.push(e[i])
+                    }
+                    return "";
+                }
+                // VALIDA FRONT.
+                this.data = this.registry;
                 if (this.data.name && this.data.misc_id && this.data.state) {
                     return this.errors;
                 }
-
                 if (!this.data.name) {
                     this.errors.push('Nombre requerido.');
                 }
-
                 if (!this.data.misc_id) {
                     this.errors.push('Tipo requerido.');
                 }
                 if (!this.data.state) {
                     this.errors.push('Estado requerido.');
                 }
-
                 return this.errors;
             },
-
             // Envia al parent la orden de ocultar el form.
             clearView ( ) {
                 this.$emit( 'clearView', 0 );
             },
-
             // [GLOBAL] Recorre y vacia los datos cargados en la vista de un form.
             clearForm ( ) {
                 var self = this;
@@ -235,7 +235,6 @@
                     self.registry[key] = '';
                 });
             },
-
             // [GLOBAL] verifica si existe un elemento en un array y lo devuelve.
             inArray ( needle, haystack ) {
                 var length = haystack.length;

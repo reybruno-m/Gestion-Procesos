@@ -16,10 +16,6 @@
 	<link rel="stylesheet" href="{{ asset('libs/bootstrap4/css/bootstrap.min.css') }}">
 	<link rel="stylesheet" href="{{ asset('libs/bootstrap4/css/bootstrap-select.min.css') }}" />
 
-	<link rel="stylesheet" href="{{ asset('libs/adminLTE/bower_components/font-awesome/css/font-awesome.min.css') }}" />
-	<link rel="stylesheet" href="{{ asset('libs/adminLTE/bower_components/Ionicons/css/ionicons.min.css') }}" />
-	<link rel="stylesheet" href="{{ asset('libs/adminLTE/css/AdminLTE.min.css') }}" />
-
 </head>
 <body>
 
@@ -33,15 +29,15 @@
 @include('layouts.footer')
 
 @yield('scripts')
-
+	
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/jquery/js/jquery-3.4.0.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/jquery/js/jquery-ui.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap.bundle.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap-select.min.js') }}"></script>
-	
+
+
 	<script language="JavaScript" type="text/javascript" src="{{asset('js/app.js')}}"></script>
-	<script type="text/Javascript" src="{{ asset('libs/adminLTE/js/adminlte.min.js') }}"></script>
-	
+
 </body>
 </html>

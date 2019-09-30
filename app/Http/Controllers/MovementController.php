@@ -19,7 +19,18 @@ class MovementController extends Controller
             ->join('requests AS r', 'm.request_id', '=', 'r.id')
             ->join('users AS u', 'm.user_id', '=', 'u.id')
             ->join('states AS s', 'm.state_id', '=', 's.id')
-            ->select('m.*', 'r.id AS request_id', 'r.description AS request_description', 'r.misc_id AS request_misc_id', 'r.created_at AS request_created_at', 'r.updated_at AS request_updated_at', 'u.last_name', 'u.first_name', 'u.email', 's.name')
+            ->select(
+                'm.*', 
+                'r.id AS request_id', 
+                'r.description AS request_description', 
+                'r.misc_id AS request_misc_id', 
+                'r.created_at AS request_created_at', 
+                'r.updated_at AS request_updated_at', 
+                'u.last_name', 
+                'u.first_name', 
+                'u.email', 
+                's.name'
+            )
             ->get();
 
         return $movements;        

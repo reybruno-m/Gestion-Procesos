@@ -24,14 +24,28 @@ class RequestController extends Controller
 
     public function index()
     {
-        $requests = DB::table('requests AS r')
+        /*$requests = DB::table('requests AS r')
             ->join('misc AS m', 'r.misc_id', '=', 'm.id')
             ->join('users AS u', 'r.user_id', '=', 'u.id')
             ->join('origins AS o', 'r.origin_id', '=', 'o.id')
-            ->select('r.*', 'm.id AS pk_misc', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->select(
+                'r.*', 
+                //'r.description AS request_description', 
+                //'r.misc_id AS request_priority', 
+                //'r.user_id AS request_user_create', 
+                //'r.origin_id AS request_origin', 
+                //'r.created_at', 
+                //'r.updated_at', 
+                'm.name AS priority', 
+                'u.last_name', 
+                'u.first_name', 
+                'o.name AS origin'
+            )
             ->orderBy('r.id', 'desc')
-            ->get();
+            ->get();*/
 
+        //return count($requests);  
+        //$requests = ;     
         return $requests;        
     }
 
@@ -94,7 +108,14 @@ class RequestController extends Controller
             ->join('misc AS m', 'r.misc_id', '=', 'm.id')
             ->join('users AS u', 'r.user_id', '=', 'u.id')
             ->join('origins AS o', 'r.origin_id', '=', 'o.id')
-            ->select('r.*', 'm.id AS misc_pk', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->select(
+                'r.*', 
+                'm.id AS misc_pk', 
+                'm.name AS prioridad', 
+                'u.last_name', 
+                'u.first_name', 
+                'o.name AS origin'
+            )
             ->orderBy('created_at', 'desc')
             ->first();
 
@@ -113,11 +134,18 @@ class RequestController extends Controller
      */
     public function show($id)
     {
+
         $requests = DB::table('requests AS r')
             ->join('misc AS m', 'r.misc_id', '=', 'm.id')
             ->join('users AS u', 'r.user_id', '=', 'u.id')
             ->join('origins AS o', 'r.origin_id', '=', 'o.id')
-            ->select('r.*', 'm.id AS misc_pk', 'm.name AS prioridad', 'u.last_name', 'u.first_name', 'u.email', 'o.name AS origen')
+            ->select(
+                'r.*', 
+                'm.name AS priority', 
+                'u.last_name', 
+                'u.first_name', 
+                'o.name AS origin'
+            )
             ->where('r.id', $id)
             ->get();
 

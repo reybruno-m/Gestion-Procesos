@@ -27,15 +27,15 @@ class MiscsTableSeeder extends Seeder
 
     	DB::table('misc')->insert([
             'group' => 2,
-            'name' => 'Normal',
+            'name' => 'Baja',
         ]);
     	DB::table('misc')->insert([
             'group' => 2,
-            'name' => 'Prioritario',
+            'name' => 'Intermedia',
         ]);
     	DB::table('misc')->insert([
             'group' => 2,
-            'name' => 'Urgente',
+            'name' => 'Alta',
         ]);
     }
 }
