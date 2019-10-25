@@ -23,9 +23,6 @@
 	<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 	<link rel="stylesheet" href="{{ asset('css/styles.login.css') }}">
 
-	<!-- JS PROPIOS -->
-	<script language="JavaScript" type="text/javascript" src="{{ asset('js/app.login.js') }}"></script>
-
 </head>
 <body>
 

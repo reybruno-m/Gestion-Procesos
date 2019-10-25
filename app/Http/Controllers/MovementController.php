@@ -5,6 +5,8 @@ namespace it\Http\Controllers;
 use Illuminate\Http\Request;
 use it\Movement;
 use DB;
+use Illuminate\Support\Facades\Config;
+
 
 class MovementController extends Controller
 {
@@ -15,25 +17,7 @@ class MovementController extends Controller
      */
     public function index()
     {
-        $movements = DB::table('movements AS m')
-            ->join('requests AS r', 'm.request_id', '=', 'r.id')
-            ->join('users AS u', 'm.user_id', '=', 'u.id')
-            ->join('states AS s', 'm.state_id', '=', 's.id')
-            ->select(
-                'm.*', 
-                'r.id AS request_id', 
-                'r.description AS request_description', 
-                'r.misc_id AS request_misc_id', 
-                'r.created_at AS request_created_at', 
-                'r.updated_at AS request_updated_at', 
-                'u.last_name', 
-                'u.first_name', 
-                'u.email', 
-                's.name'
-            )
-            ->get();
 
-        return $movements;        
     }
 
     /**
@@ -54,49 +38,57 @@ class MovementController extends Controller
      */
     public function store(Request $request)
     {
-
-        $status = Movement::where('request_id', '=', $request->input('id') )
-                    ->orderBy('id', 'desc')
-                    ->first();
-
-        // Mensajes de respuesta.
-        $messages = [
-            'id.integer' => 'Se produjo un error mientras se procesaba la solicitud.',
-        ];
-
-        // Reglas de validación.
-        $rules = [
-                'id'       => 'required|integer',
-            ];
+        # Valor del Estado Inicial.
+        $state_initial = Config::get('constants.initial_states.Inicial');
         
+        # Verifico si el existen estados abiertos.
+        $status = Movement::where([
+                                ['task_id', '=', $request->input('id')], 
+                                ['state_id', '!=', $state_initial],
+                                ['finalized', '==', null]
+                            ])
+                    ->orderBy('id', 'desc')
+                    ->get();
+
+        # Mensajes de respuesta.
+        $messages = [ 'id.integer' => 'Se produjo un error mientras se procesaba la solicitud.' ];
+
+        # Reglas de validación.
+        $rules = [ 'id' => 'required|integer' ];
+       
+        # Validacion de los request
         $validator = \Validator::make($request->all(), $rules, $messages);
+        
+        if ($validator->fails() || sizeof($status) > 0) 
+        {
+            $validator->errors()->add('', 'La tarea se encuentra actualmente tomada.');
 
-        if ($validator->fails() || !empty($status)) {
-
-            $validator->errors()->add('', 'La solicitud ya fue tomada.');
-
-            return [
-                'success' => false,
-                'errors'  => $validator->errors()->all()
-            ];
+            return [ 'success' => false, 'errors'  => $validator->errors()->all() ];
         }
-       	
-       	// Inserto Movimiento.
 
+        # Finalizo el movimiento anterior.
+        Movement::where([
+                    ['finalized', '=', NULL], 
+                    ['task_id', '=', $request->input('id')]
+                ])
+            ->update(['finalized' => date("Y-m-d H:i:s")]);
+        
+        # Valor del Estado Tomado.
+        $state_taked = Config::get('constants.initial_states.Tomado');
+       	
+       	# Inserto Nuevo Movimiento.
 		$movement = new Movement();
-        $movement->request_id = addslashes($request->input('id'));
+        $movement->task_id = addslashes($request->input('id'));
         $movement->user_id = auth()->user()->id;
-        $movement->state_id = 2;
+        $movement->state_id = $state_taked;
         //$movement->description = $description;
         $movement->taken = date("Y-m-d H:i:s");
-		
 		$movement->save();
 
         return [
             'success' => true,
             'elements' => $movement,
         ];       
-
     }
 
     /**
@@ -108,19 +100,6 @@ class MovementController extends Controller
     public function show($id)
     {
 
-        $current = DB::table('movements')
-                    ->where('finalized', '<>', NULL)
-                    ->count();
-
-        $movements = DB::table('movements AS m')
-            ->join('requests AS r', 'm.request_id', '=', 'r.id')
-            ->join('users AS u', 'm.user_id', '=', 'u.id')
-            ->join('states AS s', 'm.state_id', '=', 's.id')
-            ->select('m.*', 'r.id AS request_id', 'r.description AS request_description', 'r.misc_id AS request_misc_id', 'r.created_at AS request_created_at', 'r.updated_at AS request_updated_at', 'u.last_name', 'u.first_name', 'u.email', 's.name')
-            ->where('m.id', $id)
-            ->get();
-
-        return $movements;        
     }
 
     /**
@@ -143,7 +122,30 @@ class MovementController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        switch ($request->accion) {
+            
+            case 'actualizar_movimiento':
+                
+                $movement = Movement::find($id);
+
+                if ($movement->state_id != $request->input('state')) {
+                    $movement->state_id = $request->input('state');
+                }
+
+                $movement->description = $request->input('description');
+                $movement->save();
+
+                $movement = Movement::with(
+                                'user',   # Usuarios de cada Movimiento.
+                                'state'   # Estado de cada Movimiento.
+                            )
+                        ->where('id', '=', $id)
+                        ->first();
+                
+                return $movement;       
+
+                break;
+        }
     }
 
     /**
@@ -155,5 +157,64 @@ class MovementController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    /*
+        Tomar una tarea especifica.
+    */
+
+    public function add(Request $request)
+    {
+        # Valor del Estado Inicial.
+        $state_initial = Config::get('constants.initial_states.Inicial');
+        
+        # Verifico si el existen estados abiertos.
+        $status = Movement::where([
+                                ['task_id', '=', $request->input('id')], 
+                                ['state_id', '!=', $state_initial],
+                                ['finalized', '==', null]
+                            ])
+                    ->orderBy('id', 'desc')
+                    ->get();
+
+        # Mensajes de respuesta.
+        $messages = [ 'id.integer' => 'Se produjo un error mientras se procesaba la solicitud.' ];
+
+        # Reglas de validación.
+        $rules = [ 'id' => 'required|integer' ];
+       
+        # Validacion de los request
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        
+        if ($validator->fails() || sizeof($status) > 0) 
+        {
+            $validator->errors()->add('', 'La tarea se encuentra actualmente tomada.');
+
+            return [ 'success' => false, 'errors'  => $validator->errors()->all() ];
+        }
+
+        # Finalizo el movimiento anterior.
+        Movement::where([
+                    ['finalized', '=', NULL], 
+                    ['task_id', '=', $request->input('id')]
+                ])
+            ->update(['finalized' => date("Y-m-d H:i:s")]);
+        
+        # Valor del Estado Tomado.
+        $state_taked = Config::get('constants.initial_states.Tomado');
+        
+        # Inserto Nuevo Movimiento.
+        $movement = new Movement();
+        $movement->task_id = addslashes($request->input('id'));
+        $movement->user_id = auth()->user()->id;
+        $movement->state_id = $state_taked;
+        $movement->taken = date("Y-m-d H:i:s");
+        $movement->save();
+
+        return [
+            'success' => true,
+            'elements' => $movement,
+        ];       
     }
 }

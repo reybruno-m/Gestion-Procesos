@@ -1,0 +1,99 @@
+require('./bootstrap');
+
+import moment from 'moment';
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+
+window.Vue = require('vue');
+
+Vue.use(VueRouter)
+
+// Permite formatear fechas. 
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(String(value)).format('DD-MM-YYYY hh:mm')
+  }
+});
+
+
+Vue.component('app', require('./components/AppComponent.vue'));
+
+
+// Verifico si existe el DIV con ID correspondiente a sus componentes. 
+// Solo si existe cargo los componentes.
+
+if (document.getElementById("origins")) 
+{
+	Vue.component('list-origins-component', require('./components/origins/ListOriginsComponent.vue').default);
+	Vue.component('form-origins-component', require('./components/origins/FormOriginsComponent.vue').default);
+
+	const app = new Vue({
+	    el: '#origins',
+	});
+}
+
+if (document.getElementById("tasks")) 
+{
+	Vue.component('list-tasks-component', require('./components/tasks/ListTasksComponent.vue').default);
+	Vue.component('form-tasks-component', require('./components/tasks/FormTasksComponent.vue').default);
+	// MODALS
+	Vue.component('modal-detail', require('./components/ModalComponent.vue').default);
+	
+	const app = new Vue({
+	    el: '#tasks'
+	});
+}
+
+if (document.getElementById("managment")) 
+{
+	Vue.component('users-managment-component', require('./components/managment/UsersManagmentComponent.vue').default);
+	Vue.component('roles-managment-component', require('./components/managment/RolesManagmentComponent.vue').default);
+	Vue.component('miscs-managment-component', require('./components/managment/MiscsManagmentComponent.vue').default);
+	Vue.component('states-managment-component', require('./components/managment/StatesManagmentComponent.vue').default);
+
+	const app = new Vue({
+	    el: '#managment',
+	});
+}
+
+
+
+// ROUTER VUE
+
+
+if (document.getElementById("managment")) 
+{
+/*
+	const list_or_comp = require('./components/origins/ListOriginsComponent.vue').default; 
+	const form_or_comp = require('./components/origins/FormOriginsComponent.vue').default; 
+	const list_ta_comp = require('./components/tasks/ListTasksComponent.vue').default; 
+	const form_ta_comp = require('./components/tasks/FormTasksComponent.vue').default; 
+	const users_ma_comp = require('./components/managment/UsersManagmentComponent.vue').default; 
+	const roles_ma_comp = require('./components/managment/RolesManagmentComponent.vue').default; 
+	const miscs_ma_comp = require('./components/managment/MiscsManagmentComponent.vue').default; 
+	const states_ma_comp = require('./components/managment/StatesManagmentComponent.vue').default; 
+
+
+	const routes = [
+		//{ path: '/start', component: startComp 					},
+		{ path: '/listOrigins', component: list_or_comp 		},
+		{ path: '/formOrigins', component: form_or_comp 		},
+		{ path: '/listTasks', component: list_ta_comp 			},
+		{ path: '/formTasks', component: form_ta_comp 			},
+		{ path: '/usersManagment', component: users_ma_comp		},
+		{ path: '/rolesManagment', component: roles_ma_comp		},
+		{ path: '/miscsManagment', component: miscs_ma_comp		},
+		{ path: '/statesManagment', component: states_ma_comp	}
+	]
+
+	const router = new VueRouter({
+	  routes 
+	})
+
+	const app = new Vue({
+	  router
+	}).$mount('#app')
+*/
+}
+

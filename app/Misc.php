@@ -9,9 +9,17 @@ class Misc extends Model
 
 	protected $table = "misc";
 
-    /* Relation to Origin */
-    public function origins(){
-    	return $this->hasMany('it\Origin');
+    /* Relation to Task "Priority misc_id" 1:1 */
+
+    public function task(){
+    	return $this->hasMany('it\Task');
+    }
+
+    /* Relation to Origin 1:1 */
+    
+    public function origin()
+    {
+        return $this->hasMany('it\Origin');
     }
 }
  

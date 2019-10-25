@@ -9,7 +9,7 @@ class State extends Model
     /* Relation to Movements */
 
     public function movement(){
-    	return $this->belongsTo('App\Movement', 'id_state');
+    	return $this->belongsTo('it\Movement', 'state_id');
     } 
 }
 

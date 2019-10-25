@@ -19,8 +19,7 @@
 </head>
 <body>
 
-@include('layouts.navbar')
-
+	@include('layouts.navbar')
 
 <section>
 	@yield('content')
@@ -32,10 +31,9 @@
 	
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/jquery/js/jquery-3.4.0.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/jquery/js/jquery-ui.js') }}"></script>
-	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap.bundle.min.js') }}"></script>
+	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap.min.js') }}"></script>
 	<script language="JavaScript" type="text/javascript" src="{{ asset('libs/bootstrap4/js/bootstrap-select.min.js') }}"></script>
-
 
 	<script language="JavaScript" type="text/javascript" src="{{asset('js/app.js')}}"></script>
 

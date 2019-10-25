@@ -140,7 +140,7 @@
             saveOrigin ( ) {
                 var datos = this.getDataForm();
                 if (!this.validateForm(datos).length) {
-                    var route = 'origin';
+                    var route = 'api/origin';
                     axios
                     .post(route, datos)
                     .then(res => {
@@ -165,7 +165,7 @@
                 if (!this.validateForm(datos).length) {
                     datos.append("_method", "PATCH");
                     datos.append("id", this.registry.id);
-                    var route = 'origin/' + this.registry.id;
+                    var route = 'api/origin/' + this.registry.id;
 
                     axios
                     .post(route, datos)
@@ -180,7 +180,7 @@
             //  Carga un grupo especifico de Misc en arreglo;
             loadTypesOrigin ( ) {
                 axios
-                .get('getMisc?group=1')
+                .get('api/getMisc?group=1')
                 .then(listado => {
                     var countObj = Object.keys(listado.data).length;
                     if (countObj > 0) {

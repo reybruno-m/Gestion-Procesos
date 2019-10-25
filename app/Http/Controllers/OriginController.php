@@ -10,7 +10,6 @@ use DB;
 
 class OriginController extends Controller
 {
-
    // public $response = array();
 
     /**
@@ -20,7 +19,7 @@ class OriginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+
     }
 
     public function index()
@@ -61,7 +60,7 @@ class OriginController extends Controller
         ];
 
         $rules = [
-            'name'     => 'required|string|max:100',
+            'name'     => 'required|string|max:100|',
             'misc_id'  => 'required|integer',
             'state'    => 'required|string', 
         ];
@@ -83,7 +82,7 @@ class OriginController extends Controller
 
             $origin = new Origin();
             
-            $origin->name = ucwords(strtolower($request->input('name')));
+            $origin->name = ucwords(strtolower(trim($request->input('name'))));
             $origin->misc_id = $request->input('misc_id');
             $origin->state = $request->input('state');
             
@@ -189,7 +188,7 @@ class OriginController extends Controller
             return $response; 
         }
 
-        $cantidad = DB::table('requests')
+        $cantidad = DB::table('tasks')
             ->where('origin_id', '=', $id)
             ->count();
 

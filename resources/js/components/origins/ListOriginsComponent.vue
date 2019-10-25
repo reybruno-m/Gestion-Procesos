@@ -1,5 +1,20 @@
 <template>
-    <div class="container-fluid">
+    <div>
+        
+        <!-- Accion Nuevo Origen -->
+        <div class="row">
+            <div class="col text-left">
+                <button 
+                    @click="clearView(1)"
+                    class="btn btn-sm btn-dark" 
+                    id="nuevo_origen" 
+                    name="button" 
+                    type="button" 
+                >NUEVO ORIGEN</button>
+            </div>
+        </div>
+
+        <br>
         
         <!-- Formulario de Carga, Edicion de Origen -->
         <form-origins-component
@@ -13,33 +28,15 @@
         ></form-origins-component>
 
         <br>
-
-        <div class="row alert alert-primary">
-            <div class="col text-left">
-                <h4 class="text-left">Origenes Actualmente Cargados</h4>
-            </div>
-            <div class="col text-right ptop">
-                <button 
-                    @click="clearView(1)"
-                    class="btn btn-sm btn-dark" 
-                    id="nuevo_origen" 
-                    name="button" 
-                    type="button" 
-                >NUEVO ORIGEN</button>
-                
-                <input type="button" class="btn btn-primary btn-sm" value="Imprimir Listado">
-            </div>
-        </div>
-
-        <br>
-
+        
+        <!-- Muestreo de Errores de validacion -->
         <div class="container-fluid" v-if="errors.length">
             <div class="alert alert-danger" role="alert" v-for="error in errors">
                 <b>{{ error }}</b>
             </div>
         </div>
         
-
+        <!-- Filtro de Datos -->
         <div class="row">
             <div class="col">
                 <input 
@@ -54,7 +51,8 @@
         </div>
         
         <br>
-        
+
+        <!-- Listado de elementos cargados -->
         <div class="row">
             
             <div class="col">
@@ -78,6 +76,7 @@
                             <td class="text-center">{{ element.created_at | formatDate }}</td>
                             
                             <td class="text-center" v-if="element.state === 'active'">Activo</td>
+                            
                             <td class="text-center" v-else>Inactivo</td>
 
                             <td class="text-center">
@@ -128,6 +127,7 @@
 </template>
 
 <script>
+
     export default 
     {
         data()
@@ -165,8 +165,9 @@
         {
             // Carga el listado inicial desde la db. 
             loadList: function(){
+
                 axios
-                .get('origin')
+                .get('api/origin')
                 .then(listado => {
                     var countObj = Object.keys(listado.data).length;
                     if (countObj > 0) {
@@ -180,7 +181,7 @@
             // Cambiar el estado del Origen, para que pueda ser utilizado o no.
             changeStateOrigin:  function(data, index){
                 axios
-                .post('changeState/' + data.id)
+                .post('api/changeState/' + data.id)
                 .then(response => {
                     if (response.data.success) {
                         this.listOrigins[index].state = response.data.element.state;
@@ -197,7 +198,7 @@
             deleteOrigin: function(data, index){
               if (confirm("Desea eliminar este Origen?")) {
                 axios
-                .delete('origin/' + data.id)
+                .delete('api/origin/' + data.id)
                 .then( response => {
                     this.errors = [];
                     if (response.data.success) {

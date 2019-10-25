@@ -11,13 +11,16 @@ class ManagementController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-     public function __construct()
-     {
-       $this->middleware('auth');
-     }
-
-    public function index()
+    public function __construct()
     {
+
+    }
+
+    public function index(Request $request)
+    {
+        # Restrinccion de Rol.
+        $request->user()->authorizedRoles('administrator'); 
+
         return view("management.index");
     }
 

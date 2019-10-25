@@ -7,7 +7,6 @@ use DB;
 
 class MiscController extends Controller
 {
-
 	/*
 		Retorna un listado  con los elementos correspondiente a un grupo especifico.
 	*/

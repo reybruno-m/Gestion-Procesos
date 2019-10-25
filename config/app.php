@@ -174,7 +174,6 @@ return [
         // it\Providers\BroadcastServiceProvider::class,
         it\Providers\EventServiceProvider::class,
         it\Providers\RouteServiceProvider::class,
-
     ],
 
     /*

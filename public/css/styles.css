@@ -67,3 +67,32 @@
 	overflow: hidden;
 	border:2px solid #428bca;
 }
+
+.badge-pill{
+	cursor: pointer;
+}
+.title-origen, .time-create{
+	color: black !important;
+	letter-spacing: 1px;
+}
+
+
+.Baja, .alert-baja{
+	background: #5bc0de !important;
+}
+.Intermedia, .alert-intermedia{
+	background: #f0ad4e !important;
+}
+.Alta, .alert-alta{
+	background: #d9534f !important;
+}
+
+.user-nav{
+	cursor: pointer;
+	color: #EEEEEE;
+}
+
+a:hover, a:active, a:focus {
+	outline: none !important;
+	text-decoration: none !important;
+}

@@ -13,17 +13,17 @@
     			<div class="col">
     				<label for="origen"><b>Origen: </b></label>
     				<select class="form-control" name="origen" id="origen" v-model="registry.origin_id"  tabindex="1" autofocus="">
-    					<option v-for="origen in listOrigins" :value="origen.id">{{origen.name}}</option>
+    					<option v-for="origen in listOrigins" :value="origen.id" v-if="origen.state == 'active'">{{origen.name}}</option>
     				</select>
     			</div>
     			<div class="col">
     				<label for="priority"><b>Prioridad: </b></label>
     				<select class="form-control" name="priority" id="priority" v-model="registry.misc_id" tabindex="2">
-    					<option v-for="prio in listPriority" :value="prio.id">{{prio.name}}</option>
+    					<option v-for="prio in listPriority" :value="prio.id">{{prio.name}}<i class="fa fa-circle icon-prio" v-bind:class="prio.name"></i></option>
     				</select>
     			</div>
     		
-    		</div> ]
+    		</div>
     		
     		<br>
     		
@@ -52,7 +52,7 @@
 
                 <div class="col text-center" v-if="operation === 1">
                     <input 
-                        @click="saveRequest()"
+                        @click="saveTask()"
                         class="btn btn-success" 
                         tabindex="4" 
                         type="button" 
@@ -62,7 +62,7 @@
 
                 <div class="col text-center" v-if="operation === 2">
                     <input 
-                        @click="updateRequest()"
+                        @click="updateTask()"
                         class="btn btn-success" 
                         tabindex="4" 
                         type="button" 
@@ -104,10 +104,10 @@
         methods:{
 
             // Guarda un registro en la db y lo carga en la vista.
-            saveRequest ( ) {
+            saveTask ( ) {
                 var datos = this.getDataForm();
                 if (!this.validateForm(datos).length) {
-                    var route = 'request';
+                    var route = 'api/task';
                     axios
                     .post(route, datos)
                     .then(res => {
@@ -173,7 +173,7 @@
             //  Carga un el listado de origenes en un array;
             loadOrigins ( ) {
                 axios
-                .get('/origin')
+                .get('api/origin')
                 .then(listado => {
                     var countObj = Object.keys(listado.data).length;
                     if (countObj > 0) {
@@ -187,7 +187,7 @@
             //  Carga un el listado de prioridades en un array;
             loadpriority ( ) {
                 axios
-                .get('getMisc?group=2')
+                .get('api/getMisc?group=2')
                 .then(listado => {
                     var countObj = Object.keys(listado.data).length;
                     if (countObj > 0) {

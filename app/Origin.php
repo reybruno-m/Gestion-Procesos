@@ -10,16 +10,15 @@ class Origin extends Model
 
     protected $fillable = ['misc_id', 'name', 'state'];
 
-    // Relation To Request
-    /*
-    public function requests()
-    {
-        return $this->hasMany('App\Request', 'id_origin');
-    }*/
 
-    // Relation To Misc
+    /* Relation to Tasks 1:N  */
+    public function tasks(){
+        return $this->hasMany('it\Task');
+    }
 
-    public function miscs()
+
+    /* Relation To Misc 1:N*/
+    public function misc()
     {
         return $this->belongsTo('it\Misc');
     }
