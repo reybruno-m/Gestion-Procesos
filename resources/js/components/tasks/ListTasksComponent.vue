@@ -102,6 +102,16 @@
                     <div class="card-footer">
                         <div class="row">
                             <div class="col text-left">
+                                
+                                <router-link 
+                                    class="link" 
+                                    :to="{ name: 'detalle-tarea', params:{ id: e.id } }"
+                                    >
+                                    <button class="btn btn-sm btn-secondary">
+                                        DETALLES
+                                    </button>
+                                </router-link>   
+
                                 <input 
                                     type="button" 
                                     v-if="
@@ -112,14 +122,7 @@
                                     @click="takeTask(e, index)" 
                                     value="TOMAR"
                                 >
-                                <input  
-                                    type="button" 
-                                    class="btn btn-sm btn-secondary" 
-                                    value="DETALLES"
-                                    id="show-modal" 
-                                    @click="loadDetail(e, index)"
-                                >
-
+                                
                             </div>
                             <div class="col text-right">
                                 <span 
@@ -143,76 +146,9 @@
         </div>
 
         <!-- Fin Cuerpo, Peticiones -->
-
-        <!-- SET CONTENT ON MODAL -->
-        <modal-detail v-if="modalDetail" @close="modalDetail = false">
-            <div class="row" slot="header">
-                <div class="col">
-                    <h5 class="text-center">DETALLES DE LA TAREA</h5>
-                </div>
-            </div>
-            <div class="container-fluid" slot="body">
-
-
-                <div class="row">
-                    <div class="col">
-                        <label for="estado_nuevo"><b>Modificar Estado: </b></label>
-                        <select class="form-control" name="estado_nuevo" id="estado_nuevo" v-model="movement_data.state">
-                            <option value="0" disabled="">SELECCIONAR</option>
-                            <option v-for="state in listStates" :value="state.id" v-if="state.id != 1">{{state.name}}</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <!-- ss -->
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <div class="col">
-                        <textarea class="form-control" name="description" id="description" rows="3" placeholder="Actualizar Observacion" v-model="movement_data.description"></textarea>
-                    </div>
-                </div>
-                <br>            
-                <div class="row">
-                    <div class="col text-center">
-                        <button class="btn btn-success btn-sm " @click="saveMovement()">GUARDAR CAMBIOS</button>
-                    </div>
-                </div>       
-                <br>
-                <div class="row time-scroll">
-                    <div class="col">
-                        <ul class="timeline">
-                            <li class="timeline-item bg-white rounded ml-3 p-4 shadow" v-for="(mdata, index) in movemets_modal" :key="mdata.id" v-if="mdata.state_id != 1">
-                                
-                                <div class="timeline-arrow"></div>
-
-                                <div class="row">
-                                    <div class="col">
-                                        <h5 class="title-origen">
-                                            <b>{{ mdata.state.name }}</b>
-                                            <span class="time-create">
-                                                {{ mdata.taken | formatDate }} <!-- 21 Marzo, 2019 15:30 -->
-                                                <i class="fa fa-calendar" aria-hidden="true"></i>
-                                            </span>
-                                        </h5>
-                                    </div>
-                                </div>
-  
-                                <p class="text-small mt-2 font-weight-light">{{ mdata.description }}</p>
-
-                                <footer class="blockquote-footer">Creada por {{ mdata.user.last_name + " " + mdata.user.first_name }}</footer>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-            </div>
-            
-        </modal-detail>
-
     </div>
 </template>
-
+ 
 <script>
     export default {
         data()
@@ -227,7 +163,6 @@
                 textFilter: '',                 // Texto del Dropdown de filtrado.
                 classAlert: 'alert-primary',    // Modifica la Clase del alert de filtrado.
                 user_login: "",                 // Almacena el ID del usuario de sesion activa.
-                modalDetail: false,
                 movemets_modal: [],             // Listado de movimientos que se cargaran en el modal.
                 current_task: '',               // Almacena el Indice de la tarea cargada en el modal.
                 listStates: [],                 // Listado de estados posibles para la carga de un movimiento.
@@ -348,20 +283,6 @@
                 } 
             },
 
-            // Mostrar los detalles de una tarea especifica.
-            loadDetail(data, index){
-                axios
-                .get('api/task/' + data.id)
-                .then(res => {
-                    this.modalDetail = true;
-                    this.current_task = data.id;
-                    var movimientos = Object.keys(res.data.movements).length;
-                    if (movimientos > 0) {
-                        this.movemets_modal = res.data.movements;
-                    }
-                })
-            },
-
             getStates(){
                 axios
                 .get('api/getStates')
@@ -373,26 +294,6 @@
                         }
                     }
                 })
-            },
-
-            // Agregar nuevo movimiento.
-            saveMovement(){
-                if (this.current_task != "") {
-                    let params = new FormData();
-                    params.append("description", this.movement_data.description);
-                    params.append("state", this.movement_data.state);
-                    params.append("accion", 'actualizar_movimiento');
-                    params.append("_method", "PATCH");
-                    axios
-                    .post('api/movement/' + this.current_task, params)
-                    .then(res => {
-                        window.location.reload();
-                       // console.log(res);
-                        //this.movemets_modal.push(res);
-                        //this.movemets_modal[index].movements.push(response.data.elements);
-                    })
-                    .catch(error => console.log(error))
-                }
             },
 
             // Carga en la vista un nuevo elemento y lo muestra.

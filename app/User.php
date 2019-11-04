@@ -88,4 +88,10 @@ class User extends Authenticatable
         return $this->hasMany('it\Movement');
     }
 
+    /* Relation to Comments 1:N */
+
+    public function comments(){
+        return $this->hasMany('it\Comment');
+    }
+
 }

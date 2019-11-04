@@ -1,5 +1,7 @@
 <template>
 	<div>
+        <title>{{ $route.meta.title }}</title>
+
        	<br>
 
         <div class="jumbotron jumbotron-fluid">

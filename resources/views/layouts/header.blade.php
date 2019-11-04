@@ -7,8 +7,6 @@
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
-	<title>@yield('title', 'Default') | Gestion - Procesos</title>
-
 	<link rel="stylesheet" href="{{ asset('css/app.css') }}">
 	<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 	

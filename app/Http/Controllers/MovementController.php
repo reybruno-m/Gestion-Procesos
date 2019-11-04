@@ -10,25 +10,6 @@ use Illuminate\Support\Facades\Config;
 
 class MovementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -91,27 +72,6 @@ class MovementController extends Controller
         ];       
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -122,43 +82,63 @@ class MovementController extends Controller
      */
     public function update(Request $request, $id)
     {
-        switch ($request->accion) {
-            
-            case 'actualizar_movimiento':
-                
-                $movement = Movement::find($id);
+        $errors = [];
 
-                if ($movement->state_id != $request->input('state')) {
-                    $movement->state_id = $request->input('state');
-                }
+        $id = addslashes(trim($id));
+        $observacion = addslashes(trim($request->input('observacion')));
+        $state = addslashes(trim($request->input('state')));
 
-                $movement->description = $request->input('description');
-                $movement->save();
 
-                $movement = Movement::with(
-                                'user',   # Usuarios de cada Movimiento.
-                                'state'   # Estado de cada Movimiento.
-                            )
-                        ->where('id', '=', $id)
-                        ->first();
-                
-                return $movement;       
-
-                break;
+        if (!is_numeric($id)) {
+            $errors[] = "Ocurrio un error mientras se procesaba la solicitud.";
+            return [ 'success' => false, 'errors'  => $errors ];
         }
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+        if (!is_numeric($id) || $id == 0) {
+            $errors[] = "El estado seleccionado es incorrecto, debe indicar uno del listado.";
+            return [ 'success' => false, 'errors'  => $errors ];
+        }
 
+
+        if (strlen($observacion) == 0 || $observacion == "" || $observacion == "undefined") {
+            $errors[] = "La observacion no puede estar vacia.";
+            return [ 'success' => false, 'errors'  => $errors ];
+        }
+
+        $movement = Movement::find($id);
+        
+        if ($movement->finalized != null) {
+            $errors[] = "El movimiento ya se encuentra finalizado.";
+            return [ 'success' => false, 'errors'  => $errors ];
+        }
+
+        if ($movement->user_id != auth()->user()->id) {
+            $errors[] = "El movimiento solo puede ser finalizado por el mismo usuario que lo crea.";
+            return [ 'success' => false, 'errors'  => $errors ];
+        }
+
+        $movement->description = $observacion;
+        $movement->state_id = $state;
+        # $movement->user_finalized = auth()->user()->id;
+        $movement->finalized = date("Y-m-d H:i:s");
+        $movement->save();
+
+
+        $movement = Movement::with(
+                        'user',           # Usuarios de cada Movimiento.
+                        'state',          # Estado de cada Movimiento.
+                        'comments',       # Comentarios de cada Movimiento.
+                        'comments.user'   # Usuarios de los comentarios.
+                    )
+                ->where('id', '=', $id)
+                ->first();
+
+        return [
+            'success' => true,
+            'movement' => $movement,
+        ];       
+
+    }
 
     /*
         Tomar una tarea especifica.

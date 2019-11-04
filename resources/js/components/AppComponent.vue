@@ -42,6 +42,7 @@
 		box-shadow: 7px 4px 17px -6px rgba(176,169,176,1);
 	}
 	.link{
+		padding: 14px 10px 14px 10px;
 		color: white;
 		font-size: 17px;
 	}
@@ -49,4 +50,9 @@
 		color: #EEEEEE;
 		outline: none !important;		
 	}
+	.router-link-exact-active{
+		background: #FF3547;
+		padding: 14px 10px 14px 10px;
+	}
+	
 </style>

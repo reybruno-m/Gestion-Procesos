@@ -1,11 +1,9 @@
 @extends('layouts.header')
 
-@section('title', 'Inicio')
-
 @section('content')
 
 	<div class="fixedContainer" id="workspace">
-				
+	
 		@if(Auth::check())
 			<module><!-- Area de carga de Componentes --></module>	
 		@endif

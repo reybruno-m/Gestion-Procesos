@@ -28,23 +28,8 @@ class Movement extends Model
         return $this->belongsTo('it\State');
     }
     
-
-	/* Relation to State 
-        public function state()
-        {
-            return $this->hasOne('it\State');  
-        }
-
-    	/* Relation to Users 
-    	
-        public function userRel()
-        {
-            return $this->hasOne('it\User', 'id');
-        }
-
-        public function miscsRel(){
-            return $this->hasOne('it\Misc', 'misc_id');
-        }
-    */
+    /* Relation to Comments  1:N */
+    public function comments(){ 
+        return $this->hasMany('it\Comment');
+    }
 }
-

@@ -1,6 +1,9 @@
 <template>
 	<div>
 		<div class="container d-flex align-items-center flex-column">
+			
+			<title>{{ $route.meta.title }}</title>
+
 
 			<img class="masthead-avatar mb-5" src="" alt="">
 
@@ -21,7 +24,6 @@
 					<i class="fas fa-star"></i>
 				</div>
 			<div class="divider-custom-line"></div>
-
 		</div>
 	</div>
 </template>

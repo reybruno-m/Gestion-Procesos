@@ -22,7 +22,7 @@ class TaskController extends Controller
     {
 
     }
-
+ 
     public function index()
     {
 
@@ -129,17 +129,18 @@ class TaskController extends Controller
         if (is_numeric($id)) {
 
             $task = Task::with(
-                            'movements',        # Movimientos de la tarea.
-                            'user',             # Usuario que crea la tarea.
-                            'origin',           # Origen de la tarea.
-                            'misc',             # Prioridad de la tarea.
-                            'movements.user',   # Usuarios de cada Movimiento.
-                            'movements.state'   # Estado de cada Movimiento.
-                             
+                            'movements',                # Movimientos de la tarea.
+                            'user',                     # Usuario que crea la tarea.
+                            'origin',                   # Origen de la tarea.
+                            'misc',                     # Prioridad de la tarea.
+                            'movements.user',           # Usuarios de cada Movimiento.
+                            'movements.state',          # Estado de cada Movimiento.
+                            'movements.comments',       # Comentarios de cada Movimiento.
+                            'movements.comments.user'   # Usuarios de los comentarios.
                         )
                     ->where('id', '=', $id)
                     ->first();
-            //dd($task);
+            # dd($task);
             return $task;
         }
     }

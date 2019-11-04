@@ -1,7 +1,9 @@
 <template>
 	<div>
 		<title>{{ $route.meta.title }}</title>
+       	
+       	<br>
 
-		<h4 class="text-center">Error 404 Pagina no encontrada</h4>
+		<detail-task-component></detail-task-component>
 	</div>
 </template>

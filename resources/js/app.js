@@ -19,8 +19,7 @@ window.Vue.prototype.$http = axios;
 
 Vue.component('module', require('./components/AppComponent.vue').default);
 Vue.component('home', require('./views/Home.vue').default);
-
-Vue.component('modal-detail', require('./views/Modal.vue').default);
+Vue.component('detail-task-component', require('./components/tasks/DetailTaskComponent.vue').default);
 
 Vue.component('list-origins-component', require('./components/origins/ListOriginsComponent.vue').default);
 Vue.component('form-origins-component', require('./components/origins/FormOriginsComponent.vue').default);
@@ -39,6 +38,15 @@ Vue.filter('formatDate', function(value) {
 		return moment(String(value)).format('DD-MM-YYYY hh:mm')
 	}
 });
+
+Vue.filter('formatDateMov', function(value) {
+	if (value) {
+		return moment(String(value)).format('DD-MM-YY')
+	}
+});
+
+
+
 
 import router from './routes';
 
