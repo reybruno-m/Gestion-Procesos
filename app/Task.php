@@ -8,7 +8,7 @@ class Task extends Model
 {
 
     protected $table = "tasks";
-    protected $fillable = ['description', 'misc_id', 'user_id', 'origin_id', 'created_at', 'updated_at'];
+    protected $fillable = ['description', 'misc_id', 'user_id', 'origin_id', 'destinity_id', 'state', 'created_at', 'updated_at'];
    
     # protected $with = ['movementsRel', 'miscsRel', 'usersRel', 'originsRel'];
 
@@ -29,6 +29,12 @@ class Task extends Model
 
     /* Relation to Origins  */
     public function origin(){
+        return $this->belongsTo('it\Origin');
+    }
+
+
+    /* Relation to Origin, Destinity  */
+    public function destinity(){
         return $this->belongsTo('it\Origin');
     }
 

@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-
+        
         <div class="container-fluid" v-if="errors.length">
             <div class="alert alert-danger" role="alert" v-for="error in errors">
                 Por favor verifique: <b>{{ error }}</b>
@@ -22,7 +22,12 @@
     					<option v-for="prio in listPriority" :value="prio.id">{{prio.name}}<i class="fa fa-circle icon-prio" v-bind:class="prio.name"></i></option>
     				</select>
     			</div>
-    		
+    		      <div class="col">
+                    <label for="destinity_id"><b>Destino: </b></label>
+                    <select class="form-control" name="destinity_id" id="destinity_id" v-model="registry.destinity_id"  tabindex="3" autofocus="">
+                        <option v-for="destinity_id in listOrigins" :value="destinity_id.id" v-if="destinity_id.state == 'active'">{{destinity_id.name}}</option>
+                    </select>
+                </div>
     		</div>
     		
     		<br>
@@ -31,7 +36,7 @@
     			
     			<div class="col">
     				<label for="description"><b>Descripcion: </b></label>
-    				<textarea class="form-control" name="description" id="description" v-model="registry.description" tabindex="3" rows="5"></textarea>
+    				<textarea class="form-control" name="description" id="description" v-model="registry.description" tabindex="4" rows="5"></textarea>
     			</div>
     			
     		</div>
@@ -44,7 +49,7 @@
                     <input 
                         @click="clearView()" 
                         class="btn btn-danger" 
-                        tabindex="5" 
+                        tabindex="7" 
                         type="button" 
                         value="CANCELAR" 
                     >
@@ -54,7 +59,7 @@
                     <input 
                         @click="saveTask()"
                         class="btn btn-success" 
-                        tabindex="4" 
+                        tabindex="5" 
                         type="button" 
                         value="CARGAR" 
                     >
@@ -64,7 +69,7 @@
                     <input 
                         @click="updateTask()"
                         class="btn btn-success" 
-                        tabindex="4" 
+                        tabindex="6" 
                         type="button" 
                         value="GUARDAR" 
                     >
@@ -149,6 +154,11 @@
                 if (!this.data.misc_id) {
                     this.errors.push('Prioridad requerida.');
                 }
+
+                if (!this.data.destinity_id) {
+                    this.errors.push('La tarea debe estar asignada a un sector o persona');
+                }
+
                 if (!this.data.description) {
                     this.errors.push('Descripcion requerida.');
                 }
@@ -161,6 +171,7 @@
                 let datos = new FormData();
                 datos.append("origin_id", this.registry.origin_id);
                 datos.append("misc_id", this.registry.misc_id);
+                datos.append("destinity_id", this.registry.destinity_id);
                 datos.append("description", this.registry.description);
                 return datos;
             },

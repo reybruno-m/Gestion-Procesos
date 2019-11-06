@@ -14,7 +14,7 @@
         <br><br>
 
         <!-- Inicio Encabezado, Filtros -->
-        <div class="row">
+        <div class="row" v-if="operation == 0">
             <div class="col-lg-11 col-md-11 text-left">
                 <input 
                     type="text" 
@@ -88,7 +88,7 @@
                 <div class="card">
                     <div class="card-header" v-bind:class="e.misc.name">
                         <i class="fa fa-circle"></i>
-                        <i class="title-origen"><b>{{ e.id +" "+ e.origin.name}}</b></i>
+                        <b>Destino:</b> {{ e.destinity.name }}</i>
                         <span class="time-create">
                             {{ e.created_at | formatDate }}
                             <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -97,7 +97,9 @@
                     <div class="card-body">
                         <p>{{ e.description }}</p> <!-- e.movements[0].taken -->
                         
-                        <footer class="blockquote-footer">Creada por {{e.user.last_name +" "+ e.user.first_name}}</footer>
+                        <footer class="blockquote-footer">
+                            Creada por {{e.user.last_name +" "+ e.user.first_name +" ("+ e.origin.name +")" }}
+                        </footer>
                     </div>
                     <div class="card-footer">
                         <div class="row">
@@ -115,8 +117,8 @@
                                 <input 
                                     type="button" 
                                     v-if="
-                                        e.movements[e.movements.length -1].finalized != null ||
-                                        e.movements.length == 1
+                                        e.destinity_id == origin_id ||
+                                        e.movements[e.movements.length -1].finalized != null    
                                     " 
                                     class="btn btn-sm btn-primary" 
                                     @click="takeTask(e, index)" 
@@ -163,6 +165,7 @@
                 textFilter: '',                 // Texto del Dropdown de filtrado.
                 classAlert: 'alert-primary',    // Modifica la Clase del alert de filtrado.
                 user_login: "",                 // Almacena el ID del usuario de sesion activa.
+                origin_id: "",                  // Almacena el origin_id del usuario de sesion activa.
                 movemets_modal: [],             // Listado de movimientos que se cargaran en el modal.
                 current_task: '',               // Almacena el Indice de la tarea cargada en el modal.
                 listStates: [],                 // Listado de estados posibles para la carga de un movimiento.
@@ -243,6 +246,7 @@
                             // Arreglo con listado de tareas.
                             this.listTasks.push(listado.data.tasks[i]);
                             this.user_login = listado.data.user_id;         
+                            this.origin_id = listado.data.origin_id;         
                         }
                     }
                 })

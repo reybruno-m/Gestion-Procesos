@@ -26,12 +26,23 @@ class TaskController extends Controller
     public function index()
     {
 
-        $tasks = Task::with('movements', 'misc', 'user', 'origin')->get();
-
+        //$tasks = Task::with('movements', 'misc', 'user', 'origin')->get();
+        $tasks = Task::with(
+                        'movements',                # Movimientos de la tarea.
+                        'user',                     # Usuario que crea la tarea.
+                        'origin',                   # Origen de la tarea.
+                        'destinity',                # Destino de la tarea.
+                        'misc',                     # Prioridad de la tarea.
+                        'movements.user',           # Usuarios de cada Movimiento.
+                        'movements.state',          # Estado de cada Movimiento.
+                        'movements.comments',       # Comentarios de cada Movimiento.
+                        'movements.comments.user'   # Usuarios de los comentarios.
+                    )->get();
         $res = [];
         
         $res['tasks'] = $tasks;
         $res['user_id'] = auth()->user()->id;
+        $res['origin_id'] = auth()->user()->origin_id;
 
         return $res;
     }
@@ -59,17 +70,20 @@ class TaskController extends Controller
         // Mensajes de respuesta.
         $messages = [
             'origin_id.required' => 'Debe seleccionar un origen del listado.',
-            'origin_id.integer' => 'Debe seleccionar un origen del listado.',
+            'origin_id.integer' => 'El origen indicado no es valido.',
+            'destinity_id.required' => 'Debe seleccionar destino del listado.',
+            'destinity_id.integer' => 'El destino indicado no es valido.',
             'description.min' =>'La descripcion debe contener al menos 10 caracteres.',
-            'misc_id.required' => 'Debe seleccionar una prioridad del listado.',
-            'misc_id.integer' => 'Debe seleccionar una prioridad del listado.',
+            'misc_id.required' => 'Debe seleccionar una prioridad del listado.',            
+            'misc_id.integer' => 'La prioridad indicada no es valida.',
         ];
 
         // Reglas de validación.
         $rules = [
                 'origin_id'     => 'required|integer',
-                'description'   => 'required|min:10',
                 'misc_id'       => 'required|integer',
+                'destinity_id'   => 'required|integer',
+                'description'   => 'required|min:10'
             ];
         
         $validator = \Validator::make($request->all(), $rules, $messages);
@@ -90,6 +104,8 @@ class TaskController extends Controller
         $task->misc_id = $request->input('misc_id');
         $task->user_id = auth()->user()->id;
         $task->origin_id = $request->input('origin_id');
+        $task->destinity_id = $request->input('destinity_id');
+        $task->state = 1;
         $task->created_at = date('Y-m-d H:i:s');
         $task->updated_at = date('Y-m-d H:i:s');
         
@@ -109,7 +125,17 @@ class TaskController extends Controller
 
         $movement->save();
         
-        $elements = Task::with('movements', 'misc', 'user', 'origin')->orderBy('created_at', 'desc')->first();
+        $elements = Task::with(
+                        'movements',                # Movimientos de la tarea.
+                        'user',                     # Usuario que crea la tarea.
+                        'origin',                   # Origen de la tarea.
+                        'destinity',                # Destino de la tarea.
+                        'misc',                     # Prioridad de la tarea.
+                        'movements.user',           # Usuarios de cada Movimiento.
+                        'movements.state',          # Estado de cada Movimiento.
+                        'movements.comments',       # Comentarios de cada Movimiento.
+                        'movements.comments.user'   # Usuarios de los comentarios.
+                    )->orderBy('created_at', 'desc')->first();
 
         return [
             'success' => true,
@@ -132,6 +158,7 @@ class TaskController extends Controller
                             'movements',                # Movimientos de la tarea.
                             'user',                     # Usuario que crea la tarea.
                             'origin',                   # Origen de la tarea.
+                            'destinity',                # Destino de la tarea.
                             'misc',                     # Prioridad de la tarea.
                             'movements.user',           # Usuarios de cada Movimiento.
                             'movements.state',          # Estado de cada Movimiento.

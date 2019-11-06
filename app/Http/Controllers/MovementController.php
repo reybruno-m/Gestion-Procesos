@@ -192,6 +192,16 @@ class MovementController extends Controller
         $movement->taken = date("Y-m-d H:i:s");
         $movement->save();
 
+
+        $movement = Movement::with(
+                        'user',           # Usuarios de cada Movimiento.
+                        'state',          # Estado de cada Movimiento.
+                        'comments',       # Comentarios de cada Movimiento.
+                        'comments.user'   # Usuarios de los comentarios.
+                    )
+                ->where('id', '=', $movement->id)
+                ->first();
+
         return [
             'success' => true,
             'elements' => $movement,

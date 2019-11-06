@@ -2568,8 +2568,16 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2757,13 +2765,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
-    var _ref;
-
-    return _ref = {
+    return {
       id: '',
       // Indice de entrada de la tarea. se recibe por url.
-      tarea_origen: ''
-    }, _defineProperty(_ref, "tarea_origen", ''), _defineProperty(_ref, "tarea_descripcion", ''), _defineProperty(_ref, "tarea_usuario", ''), _defineProperty(_ref, "tarea_fcreacion", ''), _defineProperty(_ref, "movimientos", []), _defineProperty(_ref, "operation", 0), _defineProperty(_ref, "registry", []), _defineProperty(_ref, "errors", []), _ref;
+      tarea_destino: '',
+      tarea_descripcion: '',
+      tarea_usuario: '',
+      tarea_fcreacion: '',
+      movimientos: [],
+      // Listado de movimientos y sus relaciones.
+      operation: 0,
+      // Estado de Operacion, muestra u oculta formularios 
+      registry: [],
+      // Datos del origen nuevo/edicion. 'registry', 
+      errors: [] // Registra errores, para la validacion.
+
+    };
   },
   mounted: function mounted() {
     this.id = this.$route.params.id;
@@ -2779,15 +2796,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       axios.get('api/task/' + this.id).then(function (res) {
         // Datos de la tarea
-        _this.tarea_origen = res.data.origin.name;
+        _this.tarea_destino = res.data.destinity.name;
         _this.tarea_descripcion = res.data.description;
-        _this.tarea_usuario = res.data.user.last_name + " " + res.data.user.first_name;
+        _this.tarea_usuario = res.data.user.last_name + " " + res.data.user.first_name + " (" + res.data.origin.name + ")";
         _this.tarea_fcreacion = res.data.created_at; // Datos de los movimientos.
 
         for (var i = 0; i < res.data.movements.length; i++) {
           _this.movimientos.push(res.data.movements[i]);
         }
       });
+    },
+    takeTask: function takeTask(data, index) {
+      var _this2 = this;
+
+      if (confirm("Desea Tomar la Tarea seleccionada?")) {
+        var params = new FormData();
+        params.append("id", this.id);
+        axios.post('api/addMovement', params).then(function (response) {
+          if (response.data.success) {
+            alert("Tarea tomada con exito.");
+
+            _this2.movimientos.push(response.data.elements);
+          } else {
+            alert(response.data.errors[0]);
+          }
+        })["catch"](function (error) {
+          return console.log(error);
+        });
+      }
     },
     // Despliega el formulario de carga de un nuevo comentario.
     showNewComment: function showNewComment(id_movement) {
@@ -2800,7 +2836,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     // Procesa el guardado y actualizacion de la vista de un nuevo comentario.
     saveNewComment: function saveNewComment(id_movement, index) {
-      var _this2 = this;
+      var _this3 = this;
 
       var datos = new FormData();
       datos.append("id", id_movement);
@@ -2809,13 +2845,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (!this.validateForm(datos, false, 'comentario').length) {
         axios.post('api/comment', datos).then(function (res) {
           if (res.data.success) {
-            _this2.movimientos[index].comments.push(res.data.comment);
+            _this3.movimientos[index].comments.push(res.data.comment);
 
-            _this2.clearForm();
+            _this3.clearForm();
 
-            _this2.cancelAction();
+            _this3.cancelAction();
           } else {
-            _this2.validateForm(res.data.errors, true);
+            _this3.validateForm(res.data.errors, true);
           }
         });
       }
@@ -2827,7 +2863,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     // Procesa la finalizacion y actualizacion de la vista al cerrar el movimiento.
     saveFinishMovement: function saveFinishMovement(id_movement, index) {
-      var _this3 = this;
+      var _this4 = this;
 
       var datos = new FormData();
       datos.append("observacion", this.registry.observacion);
@@ -2837,13 +2873,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (!this.validateForm(datos, false, 'finalizar').length) {
         axios.post('api/movement/' + id_movement, datos).then(function (res) {
           if (res.data.success) {
-            _this3.movimientos[index] = res.data.movement;
+            _this4.movimientos[index] = res.data.movement;
 
-            _this3.clearForm();
+            _this4.clearForm();
 
-            _this3.cancelAction();
+            _this4.cancelAction();
           } else {
-            _this3.validateForm(res.data.errors, true);
+            _this4.validateForm(res.data.errors, true);
           }
         });
       }
@@ -2909,6 +2945,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3055,6 +3096,10 @@ __webpack_require__.r(__webpack_exports__);
         this.errors.push('Prioridad requerida.');
       }
 
+      if (!this.data.destinity_id) {
+        this.errors.push('La tarea debe estar asignada a un sector o persona');
+      }
+
       if (!this.data.description) {
         this.errors.push('Descripcion requerida.');
       }
@@ -3066,6 +3111,7 @@ __webpack_require__.r(__webpack_exports__);
       var datos = new FormData();
       datos.append("origin_id", this.registry.origin_id);
       datos.append("misc_id", this.registry.misc_id);
+      datos.append("destinity_id", this.registry.destinity_id);
       datos.append("description", this.registry.description);
       return datos;
     },
@@ -3273,6 +3319,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -3294,6 +3342,8 @@ __webpack_require__.r(__webpack_exports__);
       // Modifica la Clase del alert de filtrado.
       user_login: "",
       // Almacena el ID del usuario de sesion activa.
+      origin_id: "",
+      // Almacena el origin_id del usuario de sesion activa.
       movemets_modal: [],
       // Listado de movimientos que se cargaran en el modal.
       current_task: '',
@@ -3380,6 +3430,7 @@ __webpack_require__.r(__webpack_exports__);
             _this.listTasks.push(listado.data.tasks[i]);
 
             _this.user_login = listado.data.user_id;
+            _this.origin_id = listado.data.origin_id;
           }
         }
       });
@@ -58448,9 +58499,9 @@ var render = function() {
             _c("div", { staticClass: "card" }, [
               _c("div", { staticClass: "card-body bg-light" }, [
                 _c("h6", [
-                  _vm._v("\n\t\t\t\t  \t\t\tOrigen "),
+                  _vm._v("\n\t\t\t\t  \t\t\tAsignada a "),
                   _c("span", { staticClass: "title-task" }, [
-                    _c("b", [_vm._v(_vm._s(_vm.tarea_origen))])
+                    _c("b", [_vm._v(_vm._s(_vm.tarea_destino))])
                   ]),
                   _vm._v(" "),
                   _c("i", { staticClass: "creado" }, [
@@ -58639,7 +58690,7 @@ var render = function() {
                                             expression: "registry.state"
                                           }
                                         ],
-                                        staticClass: "form-control",
+                                        staticClass: "form-control input-sm",
                                         attrs: { name: "state", id: "state" },
                                         on: {
                                           change: function($event) {
@@ -58879,10 +58930,10 @@ var render = function() {
         _vm._v(" "),
         _c("br"),
         _vm._v(" "),
-        _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "row text-center" }, [
           _c(
             "div",
-            { staticClass: "col text-left" },
+            { staticClass: "col text-center" },
             [
               _c(
                 "router-link",
@@ -58895,7 +58946,7 @@ var render = function() {
                   _c(
                     "button",
                     {
-                      staticClass: "btn btn-sm btn-primary",
+                      staticClass: "btn btn-outline-danger btn-sm",
                       attrs: { tabindex: "1" }
                     },
                     [_vm._v("\n\t\t    \t\t\t\tREGRESAR\n\t\t    \t\t\t")]
@@ -58906,11 +58957,30 @@ var render = function() {
             1
           ),
           _vm._v(" "),
-          _c("div", { staticClass: "col text-right" }, [
+          _c("div", { staticClass: "col text-center" }, [
+            _vm.movimientos[_vm.movimientos.length - 1].finalized != null ||
+            _vm.movimientos.length == 1
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-outline-dark btn-sm",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.takeTask()
+                      }
+                    }
+                  },
+                  [_vm._v("TOMAR TAREA")]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col text-center" }, [
             _c(
               "button",
               {
-                staticClass: "btn btn-sm btn-success",
+                staticClass: "btn btn-outline-success btn-sm",
                 attrs: { tabindex: "3" },
                 on: {
                   click: function($event) {
@@ -58918,7 +58988,7 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("\n\t    \t\t\t\tFINALIZAR TAREA\n\t    \t\t\t")]
+              [_vm._v("FINALIZAR TAREA")]
             )
           ])
         ])
@@ -58926,6 +58996,8 @@ var render = function() {
       2
     ),
     _vm._v(" "),
+    _c("br"),
+    _c("br"),
     _c("br")
   ])
 }
@@ -59087,6 +59159,56 @@ var render = function() {
               }),
               0
             )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col" }, [
+            _vm._m(2),
+            _vm._v(" "),
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.registry.destinity_id,
+                    expression: "registry.destinity_id"
+                  }
+                ],
+                staticClass: "form-control",
+                attrs: {
+                  name: "destinity_id",
+                  id: "destinity_id",
+                  tabindex: "3",
+                  autofocus: ""
+                },
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.$set(
+                      _vm.registry,
+                      "destinity_id",
+                      $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+                    )
+                  }
+                }
+              },
+              _vm._l(_vm.listOrigins, function(destinity_id) {
+                return destinity_id.state == "active"
+                  ? _c("option", { domProps: { value: destinity_id.id } }, [
+                      _vm._v(_vm._s(destinity_id.name))
+                    ])
+                  : _vm._e()
+              }),
+              0
+            )
           ])
         ]),
         _vm._v(" "),
@@ -59094,7 +59216,7 @@ var render = function() {
         _vm._v(" "),
         _c("div", { staticClass: "row separator" }, [
           _c("div", { staticClass: "col" }, [
-            _vm._m(2),
+            _vm._m(3),
             _vm._v(" "),
             _c("textarea", {
               directives: [
@@ -59109,7 +59231,7 @@ var render = function() {
               attrs: {
                 name: "description",
                 id: "description",
-                tabindex: "3",
+                tabindex: "4",
                 rows: "5"
               },
               domProps: { value: _vm.registry.description },
@@ -59131,7 +59253,7 @@ var render = function() {
           _c("div", { staticClass: "col text-center" }, [
             _c("input", {
               staticClass: "btn btn-danger",
-              attrs: { tabindex: "5", type: "button", value: "CANCELAR" },
+              attrs: { tabindex: "7", type: "button", value: "CANCELAR" },
               on: {
                 click: function($event) {
                   return _vm.clearView()
@@ -59144,7 +59266,7 @@ var render = function() {
             ? _c("div", { staticClass: "col text-center" }, [
                 _c("input", {
                   staticClass: "btn btn-success",
-                  attrs: { tabindex: "4", type: "button", value: "CARGAR" },
+                  attrs: { tabindex: "5", type: "button", value: "CARGAR" },
                   on: {
                     click: function($event) {
                       return _vm.saveTask()
@@ -59158,7 +59280,7 @@ var render = function() {
             ? _c("div", { staticClass: "col text-center" }, [
                 _c("input", {
                   staticClass: "btn btn-success",
-                  attrs: { tabindex: "4", type: "button", value: "GUARDAR" },
+                  attrs: { tabindex: "6", type: "button", value: "GUARDAR" },
                   on: {
                     click: function($event) {
                       return _vm.updateTask()
@@ -59189,6 +59311,14 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("label", { attrs: { for: "priority" } }, [
       _c("b", [_vm._v("Prioridad: ")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("label", { attrs: { for: "destinity_id" } }, [
+      _c("b", [_vm._v("Destino: ")])
     ])
   },
   function() {
@@ -59245,133 +59375,137 @@ var render = function() {
       _c("br"),
       _c("br"),
       _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-lg-11 col-md-11 text-left" }, [
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.termKey,
-                expression: "termKey"
-              }
-            ],
-            staticClass: "form-control",
-            attrs: {
-              type: "text",
-              name: "filtro",
-              id: "filtro",
-              placeholder: "Filtrar Peticiones",
-              autofocus: "",
-              autocomplete: "off"
-            },
-            domProps: { value: _vm.termKey },
-            on: {
-              input: function($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.termKey = $event.target.value
-              }
-            }
-          })
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-lg-1 col-md-1 text-left" }, [
-          _c("div", { staticClass: "btn-group" }, [
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-dark dropdown-toggle",
+      _vm.operation == 0
+        ? _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "col-lg-11 col-md-11 text-left" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.termKey,
+                    expression: "termKey"
+                  }
+                ],
+                staticClass: "form-control",
                 attrs: {
-                  type: "button",
-                  "data-toggle": "dropdown",
-                  "aria-haspopup": "true",
-                  "aria-expanded": "false"
+                  type: "text",
+                  name: "filtro",
+                  id: "filtro",
+                  placeholder: "Filtrar Peticiones",
+                  autofocus: "",
+                  autocomplete: "off"
+                },
+                domProps: { value: _vm.termKey },
+                on: {
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.termKey = $event.target.value
+                  }
                 }
-              },
-              [_vm._v("\n                PRIORIDAD\n                ")]
-            ),
+              })
+            ]),
             _vm._v(" "),
-            _c("div", { staticClass: "dropdown-menu" }, [
-              _c(
-                "a",
-                {
-                  staticClass: "dropdown-item",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      return _vm.setPriority("todo")
+            _c("div", { staticClass: "col-lg-1 col-md-1 text-left" }, [
+              _c("div", { staticClass: "btn-group" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-dark dropdown-toggle",
+                    attrs: {
+                      type: "button",
+                      "data-toggle": "dropdown",
+                      "aria-haspopup": "true",
+                      "aria-expanded": "false"
                     }
-                  }
-                },
-                [
-                  _vm._v(
-                    "\n                        Todos\n                    "
+                  },
+                  [_vm._v("\n                PRIORIDAD\n                ")]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dropdown-menu" }, [
+                  _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.setPriority("todo")
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        Todos\n                    "
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.setPriority("baja")
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        Baja\n                        "
+                      ),
+                      _c("i", { staticClass: "fa fa-circle icon-prio Baja" })
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.setPriority("intermedia")
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        Intermedia\n                        "
+                      ),
+                      _c("i", {
+                        staticClass: "fa fa-circle icon-prio Intermedia"
+                      })
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.setPriority("alta")
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        Alta\n                        "
+                      ),
+                      _c("i", { staticClass: "fa fa-circle icon-prio Alta" })
+                    ]
                   )
-                ]
-              ),
-              _vm._v(" "),
-              _c(
-                "a",
-                {
-                  staticClass: "dropdown-item",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      return _vm.setPriority("baja")
-                    }
-                  }
-                },
-                [
-                  _vm._v(
-                    "\n                        Baja\n                        "
-                  ),
-                  _c("i", { staticClass: "fa fa-circle icon-prio Baja" })
-                ]
-              ),
-              _vm._v(" "),
-              _c(
-                "a",
-                {
-                  staticClass: "dropdown-item",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      return _vm.setPriority("intermedia")
-                    }
-                  }
-                },
-                [
-                  _vm._v(
-                    "\n                        Intermedia\n                        "
-                  ),
-                  _c("i", { staticClass: "fa fa-circle icon-prio Intermedia" })
-                ]
-              ),
-              _vm._v(" "),
-              _c(
-                "a",
-                {
-                  staticClass: "dropdown-item",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      return _vm.setPriority("alta")
-                    }
-                  }
-                },
-                [
-                  _vm._v(
-                    "\n                        Alta\n                        "
-                  ),
-                  _c("i", { staticClass: "fa fa-circle icon-prio Alta" })
-                ]
-              )
+                ])
+              ])
             ])
           ])
-        ])
-      ]),
+        : _vm._e(),
       _vm._v(" "),
       _vm.textFilter != ""
         ? _c("div", { staticClass: "row" }, [
@@ -59417,9 +59551,8 @@ var render = function() {
               _c("div", { staticClass: "card-header", class: e.misc.name }, [
                 _c("i", { staticClass: "fa fa-circle" }),
                 _vm._v(" "),
-                _c("i", { staticClass: "title-origen" }, [
-                  _c("b", [_vm._v(_vm._s(e.id + " " + e.origin.name))])
-                ]),
+                _c("b", [_vm._v("Destino:")]),
+                _vm._v(" " + _vm._s(e.destinity.name)),
                 _vm._v(" "),
                 _c("span", { staticClass: "time-create" }, [
                   _vm._v(
@@ -59439,8 +59572,16 @@ var render = function() {
                 _vm._v(" "),
                 _c("footer", { staticClass: "blockquote-footer" }, [
                   _vm._v(
-                    "Creada por " +
-                      _vm._s(e.user.last_name + " " + e.user.first_name)
+                    "\n                        Creada por " +
+                      _vm._s(
+                        e.user.last_name +
+                          " " +
+                          e.user.first_name +
+                          " (" +
+                          e.origin.name +
+                          ")"
+                      ) +
+                      "\n                    "
                   )
                 ])
               ]),
@@ -59472,8 +59613,8 @@ var render = function() {
                         ]
                       ),
                       _vm._v(" "),
-                      e.movements[e.movements.length - 1].finalized != null ||
-                      e.movements.length == 1
+                      e.destinity_id == _vm.origin_id ||
+                      e.movements[e.movements.length - 1].finalized != null
                         ? _c("input", {
                             staticClass: "btn btn-sm btn-primary",
                             attrs: { type: "button", value: "TOMAR" },

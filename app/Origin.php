@@ -22,5 +22,12 @@ class Origin extends Model
     {
         return $this->belongsTo('it\Misc');
     }
+
+
+
+    /* Relation to Task 1:N */
+    public function task(){
+        return $this->belongsTo('it\Task');
+    }
 }
  

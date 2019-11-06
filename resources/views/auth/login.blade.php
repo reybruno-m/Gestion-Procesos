@@ -51,9 +51,44 @@
             @endif
           </div>
         </div>
+      </div>      
+    </div>
+    
+    <!-- Borrar en Produccion -->
+    <br>
+    <div class="row">
+      <div class="col">
+        <div class="container bg-light">
+          <br>
+          <h6 class="text-default"><b>Sector:</b> Informatica</h6>
+          <h6 class="text-default"><b>Usuario:</b> informatica@gmail.com</h6>
+          <h6 class="text-default"><b>Rol:</b> Usuario normal</h6>
+          <hr>
+          <h6 class="text-default"><b>Sector:</b> Mantenimiento</h6>
+          <h6 class="text-default"><b>Usuario:</b> mantenimiento@gmail.com</h6>
+          <h6 class="text-default"><b>Rol:</b> Usuario normal</h6>
+          <hr>
+          <h6 class="text-default"><b>Sector:</b> Patrimonio</h6>
+          <h6 class="text-default"><b>Usuario:</b> patrimonio@gmail.com</h6>
+          <h6 class="text-default"><b>Rol:</b> Usuario normal</h6>
+          <hr>
+          <h6 class="text-default"><b>Sector:</b> Patrimonio</h6>
+          <h6 class="text-default"><b>Usuario:</b> estadisticas@gmail.com</h6>
+          <h6 class="text-default"><b>Rol:</b> Usuario estadisticas, solo consultas</h6>
+          <hr>
+          <h6 class="text-default"><b>Sector:</b> -</h6>
+          <h6 class="text-default"><b>Usuario:</b> admin@gmail.com</h6>
+          <h6 class="text-default"><b>Rol:</b> Usuario administrador general</h6>
+          <hr>
+          <h6 class="text-default"><b>Clave de acceso:</b> 123456</h6>
+          <br><br>
+        </div>
       </div>
     </div>
   </div>
+  <br>    <!-- Borrar en Produccion -->
+
+
 </div>
 
 @endsection

@@ -13,12 +13,11 @@
 					<div class="card">
 					  <div class="card-body bg-light">
 					  	<h6>
-				  			Origen <span class="title-task"> <b>{{ tarea_origen }}</b></span> 
+				  			Asignada a <span class="title-task"> <b>{{ tarea_destino }}</b></span> 
 							<i class="creado">{{ tarea_fcreacion }}</i>
 				  		</h6>
 						<br>
 					    <p class="card-text">{{ tarea_descripcion }}</p>
-					  	
 						<i class="text-muted">Tarea Creada por <b>{{ tarea_usuario }}</b></i>
 					  </div>
 					</div>
@@ -96,7 +95,7 @@
 							<form class="form-group" id="frm-finish-mov">
 								<div class="row">
 									<div class="col">
-										<select class="form-control" name="state" id="state" v-model="registry.state">
+										<select class="form-control input-sm" name="state" id="state" v-model="registry.state">
 											<option value="0" selected="">ESTADO DE CIERRE</option>
 											<option value="5">FINALIZADO</option>
 											<option value="4">PAUSADO</option>
@@ -149,7 +148,7 @@
 					</div>
 				</div>
 			</div><!-- / Movimientos de la tarea -->
-
+			
 			<br>
 
 			<!-- Errores -->
@@ -162,23 +161,34 @@
 			<br>
 
 	    	<!-- Acciones sobre la tarea -->
-	    	<div class="row">
-	    		<div class="col text-left">
+	    	<div class="row text-center">
+	    		<div class="col text-center">
 					<router-link class="link" style="text-decoration:none" v-bind:to="{ name: 'tareas' }">
-						<button class="btn btn-sm btn-primary" tabindex="1">
+						<button class="btn btn-outline-danger btn-sm" tabindex="1">
 		    				REGRESAR
 		    			</button>
 					</router-link>
 	    		</div>
-	    		<div class="col text-right">
-	    			<button class="btn btn-sm btn-success" @click="finalizedTask()" tabindex="3">
-	    				FINALIZAR TAREA
-	    			</button>
+	    		<div class="col text-center">
+				  	<button
+				  		type="button" 
+				  		@click="takeTask()" 
+				  		class="btn btn-outline-dark btn-sm"
+				  		v-if="movimientos[movimientos.length -1].finalized != null || movimientos.length == 1"
+				  	>TOMAR TAREA</button>
+                    <!-- v-if="m[m.length -1].finalized != null || m.length == 1"  -->
+				</div>
+	    		<div class="col text-center">
+	    			<button 
+		    			class="btn btn-outline-success btn-sm" 
+		    			@click="finalizedTask()" 
+		    			tabindex="3"
+	    			>FINALIZAR TAREA</button>
 	    		</div>
 	    	</div><!-- / Acciones sobre la tarea -->
-
+		
 		</div>
-    	<br>
+    	<br><br><br>
 	</div>
 
 </template>
@@ -189,8 +199,7 @@
 		{
 			return {
 				id : '',						// Indice de entrada de la tarea. se recibe por url.
-				tarea_origen : '',				
-				tarea_origen : '',
+				tarea_destino : '',				
 				tarea_descripcion : '',
 				tarea_usuario : '',
 				tarea_fcreacion : '',
@@ -219,9 +228,9 @@
                 .get( 'api/task/' + this.id )
                 .then(res => {
                     // Datos de la tarea
-					this.tarea_origen = res.data.origin.name;
+					this.tarea_destino = res.data.destinity.name;
 					this.tarea_descripcion = res.data.description;
-					this.tarea_usuario = res.data.user.last_name +" "+res.data.user.first_name;
+					this.tarea_usuario = res.data.user.last_name +" "+res.data.user.first_name + " (" + res.data.origin.name + ")";
 					this.tarea_fcreacion = res.data.created_at;
 					// Datos de los movimientos.
 					for (var i = 0; i < res.data.movements.length; i++) 
@@ -229,6 +238,25 @@
 						this.movimientos.push(res.data.movements[i]);
 					}
                 })
+            },
+
+			takeTask(data, index){
+                if (confirm("Desea Tomar la Tarea seleccionada?")) {
+                    let params = new FormData();
+                    params.append("id", this.id);
+                    
+                    axios
+                    .post('api/addMovement', params)
+                    .then(response => {
+                        if (response.data.success) {
+                            alert("Tarea tomada con exito.");
+                            this.movimientos.push(response.data.elements);
+                        }else{
+                            alert(response.data.errors[0]);
+                        }
+                    })
+                    .catch(error => console.log(error))
+                } 
             },
 
             // Despliega el formulario de carga de un nuevo comentario.

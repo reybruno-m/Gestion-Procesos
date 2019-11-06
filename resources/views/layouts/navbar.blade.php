@@ -8,7 +8,7 @@
         <ul class="navbar-nav">
           @if(Auth::check())
           <li class="nav-item">
-            <a class="text-center text-muted user-nav">{{ ucwords(Auth::user()->first_name) }}</a>
+            <a class="text-center text-muted user-nav">{{ ucwords(Auth::user()->last_name) ." ". ucwords(Auth::user()->first_name) }}</a>
           </li>
           <li class="nav-item">
             <a class="text-danger" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"> Salir </a>
